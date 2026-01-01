@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GastroMind - Restoran Yönetim Sistemi</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍽️ GastroMind</h1>
+            <p>Profesyonel Restoran Yönetim Sistemi</p>
+        </header>
+
+        <nav class="navbar">
+            <a href="#menu">Menü</a>
+            <a href="#customers">Müşteriler</a>
+            <a href="#reservations">Rezervasyonlar</a>
+            <a href="#orders">Siparişler</a>
+            <a href="#reports">Raporlar</a>
+            <a href="#feedback">Geri Bildirim</a>
+        </nav>
+
+        <main>
+            <!-- Menü Sayfası -->
+            <section id="menu" class="page">
+                <h2>📖 Menü</h2>
+                <div id="menu-list" class="content-area">
+                    <p>Menü yükleniyor...</p>
+                </div>
+            </section>
+
+            <!-- Müşteriler Sayfası -->
+            <section id="customers" class="page">
+                <h2>👥 Müşteriler</h2>
+                <div id="customers-list" class="content-area">
+                    <p>Müşteriler yükleniyor...</p>
+                </div>
+            </section>
+
+            <!-- Rezervasyonlar Sayfası -->
+            <section id="reservations" class="page">
+                <h2>📅 Rezervasyonlar</h2>
+                <div id="reservations-list" class="content-area">
+                    <p>Rezervasyonlar yükleniyor...</p>
+                </div>
+            </section>
+
+            <!-- Siparişler Sayfası -->
+            <section id="orders" class="page">
+                <h2>🛒 Siparişler</h2>
+                <div id="orders-list" class="content-area">
+                    <p>Siparişler yükleniyor...</p>
+                </div>
+            </section>
+
+            <!-- Raporlar Sayfası -->
+            <section id="reports" class="page">
+                <h2>📊 Gelişmiş Raporlar</h2>
+                <div class="report-buttons">
+                    <button onclick="loadReport('top-customer-orders')">En Çok Harcayan Müşteri</button>
+                    <button onclick="loadReport('category-revenue')">Kategorilere Göre Satış</button>
+                    <button onclick="loadReport('customer-spending')">Müşteri Harcamaları</button>
+                    <button onclick="loadReport('customer-classification')">Müşteri Sınıflandırması</button>
+                    <button onclick="loadReport('table-performance')">Masa Performansı</button>
+                </div>
+                <div id="reports-content" class="content-area">
+                    <p>Rapor seçiniz...</p>
+                </div>
+            </section>
+
+            <!-- Geri Bildirim Sayfası -->
+            <section id="feedback" class="page">
+                <h2>⭐ Geri Bildirim</h2>
+                <div id="feedback-list" class="content-area">
+                    <p>Geri bildirimler yükleniyor...</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 GastroMind - Grup Projesi | COMP 306</p>
+        </footer>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
