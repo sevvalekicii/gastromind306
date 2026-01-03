@@ -6,7 +6,8 @@ orders_bp = Blueprint('orders', __name__, url_prefix='/api/orders')
 
 @orders_bp.route('', methods=['GET'])
 def get_orders():
-    """Tüm siparişleri getir"""
+    """Tüm siparişleri getir, opsiyonel tarih filtresi"""
+    date_filter = request.args.get('date')
     query = """
     SELECT o.order_id, ds.session_id, c.full_name as customer_name,
            o.order_time, COUNT(od.detail_id) as item_count
@@ -15,14 +16,17 @@ def get_orders():
     JOIN RESERVATIONS r ON ds.reservation_id = r.reservation_id
     JOIN CUSTOMERS c ON r.customer_id = c.customer_id
     LEFT JOIN ORDERDETAILS od ON o.order_id = od.order_id
-    GROUP BY o.order_id
-    ORDER BY o.order_time DESC
     """
-    data = execute_query(query)
+    params = []
+    if date_filter:
+        query += " WHERE DATE(o.order_time) = %s"
+        params.append(date_filter)
+    query += " GROUP BY o.order_id ORDER BY o.order_time DESC"
+    data = execute_query(query, params)
     if data:
         return jsonify(data)
     else:
-        return jsonify({"error": "Siparişler alınamadı"}), 500
+        return jsonify([])
 
 @orders_bp.route('/<int:order_id>/details', methods=['GET'])
 def get_order_details(order_id):

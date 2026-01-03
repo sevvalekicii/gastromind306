@@ -49,8 +49,9 @@ CREATE TABLE STAFF (
 CREATE TABLE SHIFTSCHEDULES (
     shift_id INT AUTO_INCREMENT PRIMARY KEY,
     staff_id INT,
-    shift_start DATETIME,
-    shift_end DATETIME,
+    day_of_week VARCHAR(20),
+    start_time TIME,
+    end_time TIME,
     FOREIGN KEY (staff_id) REFERENCES STAFF(staff_id)
 );
 
@@ -169,12 +170,37 @@ INSERT INTO STAFF (name, role, hire_date) VALUES
 ('Somer Sivrioğlu', 'Tadımcı', '2021-05-15'),
 ('Danilo Zanna', 'Host', '2022-03-10'),
 ('Garson Ali', 'Garson', '2023-01-15'), -- ID: 4
-('Garson Ayşe', 'Garson', '2023-03-10'); -- ID: 5
+('Garson Ayşe', 'Garson', '2023-03-10'), -- ID: 5
+('Garson Deniz', 'Garson', '2023-01-15'), -- ID: 6
+('Garson Ahmet', 'Garson', '2023-01-15'), -- ID: 7
+('Garson Lucia', 'Garson', '2023-01-15'), -- ID: 8
+('Garson Elif', 'Garson', '2023-01-15'), -- ID: 9
+('Garson Murat', 'Garson', '2023-01-15'), -- ID: 10
+('Garson Samet', 'Garson', '2023-01-15'), -- ID: 11
+('Garson Ozan', 'Garson', '2023-01-15'), -- ID: 12
+('Garson Esra', 'Garson', '2023-01-15'), -- ID: 13
+('Garson Leo', 'Garson', '2023-01-15'), -- ID: 14
+('Garson Charlotte', 'Garson', '2023-01-15'), -- ID: 15
+('Garson Mustafa', 'Garson', '2023-01-15'), -- ID: 16
+('Garson Muhammet', 'Garson', '2023-01-15'); -- ID: 17
 
 -- 6. VARDİYA (UNUTULMAMALI)
-INSERT INTO SHIFTSCHEDULES (staff_id, shift_start, shift_end) VALUES
-(4, '2025-12-15 16:00:00', '2025-12-15 23:59:00'), -- Garson Ali'nin vardiyası
-(5, '2025-12-16 10:00:00', '2025-12-16 18:00:00'); -- Garson Ayşe'nin vardiyası
+INSERT INTO SHIFTSCHEDULES (staff_id, day_of_week, start_time, end_time) VALUES
+(4, 'Pazar', '08:00:00', '16:00:00'), -- Garson Ali'nin vardiyası
+(5, 'Pazar', '16:00:00', '23:59:00'), -- Garson Ayşe'nin vardiyası
+(6, 'Pazartesi', '08:00:00', '16:00:00'), -- Garson 1 Pazartesi sabah
+(7, 'Pazartesi', '16:00:00', '23:59:00'), -- Garson 2 Pazartesi akşam
+(8, 'Salı', '08:00:00', '16:00:00'), -- Garson 3 Salı sabah
+(9, 'Salı', '16:00:00', '23:59:00'), -- Garson 4 Salı akşam
+(10, 'Çarşamba', '08:00:00', '16:00:00'), -- Garson 5 Çarşamba sabah
+(11, 'Çarşamba', '16:00:00', '23:59:00'), -- Garson 6 Çarşamba akşam
+(12, 'Perşembe', '08:00:00', '16:00:00'), -- Garson 7 Perşembe sabah
+(13, 'Perşembe', '16:00:00', '23:59:00'), -- Garson 8 Perşembe akşam
+(14, 'Cuma', '08:00:00', '16:00:00'), -- Garson 9 Cuma sabah
+(15, 'Cuma', '16:00:00', '23:59:00'), -- Garson 10 Cuma akşam
+(16, 'Cumartesi', '08:00:00', '16:00:00'), -- Garson 11 Cumartesi sabah
+(17, 'Cumartesi', '16:00:00', '23:59:00'); -- Garson 12 Cumartesi akşam
+
 
 -- 7. KATEGORİLER
 INSERT INTO CATEGORIES (category_name, target_margin) VALUES
@@ -215,18 +241,74 @@ INSERT INTO RESERVATIONS (customer_id, table_id, reservation_time, party_size, s
 (7, 7, '2025-12-21 21:00:00', 2, 'No-Show'),
 
 -- Cenk Tosun (ID 3) - Gelecek hafta ailesiyle
-(3, 5, '2026-01-10 19:00:00', 6, 'Confirmed');
+(3, 5, '2026-01-10 19:00:00', 6, 'Confirmed'),
+
+-- Ek Rezervasyonlar (Daha fazla veri için)
+(4, 5, '2025-12-17 19:00:00', 4, 'Completed'), -- Mert Günok VIP
+(5, 2, '2025-12-18 12:30:00', 2, 'Completed'), -- Kerem Aktürkoğlu öğle
+(8, 8, '2025-12-19 18:00:00', 6, 'Completed'), -- Merih Demiral bahçe
+(9, 7, '2025-12-20 20:00:00', 2, 'Completed'), -- Abdülkerim Bardakcı bar
+(10, 1, '2025-12-21 14:00:00', 1, 'Completed'), -- Kenan Yıldız solo
+(11, 4, '2025-12-22 19:30:00', 3, 'Completed'), -- Semih Kılıçsoy
+(12, 6, '2025-12-23 20:00:00', 4, 'Completed'), -- İsmail Yüksek
+(13, 9, '2025-12-24 18:30:00', 8, 'Completed'), -- Salih Özcan bahçe
+(14, 5, '2025-12-25 19:00:00', 2, 'Completed'), -- Altay Bayındır
+(15, 3, '2025-12-26 20:00:00', 5, 'Completed'), -- İrfan Can Kahveci
+(1, 5, '2025-12-27 19:00:00', 6, 'Completed'), -- Hakan tekrar
+(2, 8, '2025-12-28 17:00:00', 4, 'Completed'), -- Arda bahçe
+(3, 1, '2025-12-29 13:00:00', 3, 'Completed'), -- Cenk öğle
+(6, 9, '2025-12-30 18:00:00', 7, 'Completed'), -- Ferdi bahçe
+(7, 4, '2025-12-31 20:00:00', 2, 'Completed'); -- Barış Alper Yılmaz yılbaşı
 
 -- 10. YEMEK OTURUMLARI (Sadece Completed Olanlar)
 INSERT INTO DININGSESSIONS (reservation_id, start_time, end_time, total_amount) VALUES
 (1, '2025-12-15 20:15:00', '2025-12-15 23:30:00', 16500.00), -- Hakan'ın masası
-(2, '2025-12-16 13:10:00', '2025-12-16 14:30:00', 1800.00);  -- Arda'nın masası
+(2, '2025-12-16 13:10:00', '2025-12-16 14:30:00', 1800.00),  -- Arda'nın masası
+(6, '2025-12-17 19:15:00', '2025-12-17 22:00:00', 4200.00),  -- Mert Günok
+(7, '2025-12-18 12:45:00', '2025-12-18 14:15:00', 1200.00),  -- Kerem Aktürkoğlu
+(8, '2025-12-19 18:15:00', '2025-12-19 21:30:00', 5800.00),  -- Merih Demiral
+(9, '2025-12-20 20:15:00', '2025-12-20 22:00:00', 950.00),   -- Apo
+(10, '2025-12-21 14:15:00', '2025-12-21 15:30:00', 650.00),  -- Kenan Yıldız
+(11, '2025-12-22 19:45:00', '2025-12-22 21:30:00', 1800.00), -- Semih Kılıçsoy
+(12, '2025-12-23 20:15:00', '2025-12-23 23:00:00', 3200.00), -- İsmail Yüksek
+(13, '2025-12-24 18:45:00', '2025-12-24 22:15:00', 7200.00), -- Salih Özcan
+(14, '2025-12-25 19:15:00', '2025-12-25 21:00:00', 1400.00), -- Altay Bayındır
+(15, '2025-12-26 20:15:00', '2025-12-26 23:45:00', 4500.00), -- İrfan Can Kahveci
+(16, '2025-12-27 19:15:00', '2025-12-27 22:30:00', 8900.00), -- Hakan tekrar
+(17, '2025-12-28 17:15:00', '2025-12-28 20:00:00', 3600.00), -- Arda bahçe
+(18, '2025-12-29 13:15:00', '2025-12-29 15:00:00', 2100.00), -- Cenk öğle
+(19, '2025-12-30 18:15:00', '2025-12-30 21:30:00', 6200.00), -- Ferdi bahçe
+(20, '2025-12-31 20:15:00', '2025-12-31 23:00:00', 1800.00); -- Barış yılbaşı
 
 -- 11. SİPARİŞLER
 INSERT INTO ORDERS (session_id, staff_id, order_time) VALUES
-(1, 4, '2025-12-15 20:30:00'), -- Hakan Başlangıç
-(1, 4, '2025-12-15 21:15:00'), -- Hakan Ana Yemek
-(2, 5, '2025-12-16 13:20:00'); -- Arda Sipariş
+(1, 7, '2025-12-15 20:30:00'), -- Hakan Başlangıç
+(1, 7, '2025-12-15 21:15:00'), -- Hakan Ana Yemek
+(2, 8, '2025-12-16 13:20:00'), -- Arda Sipariş
+(3, 11, '2025-12-17 19:30:00'), -- Mert Başlangıç
+(3, 11, '2025-12-17 20:15:00'), -- Mert Ana Yemek
+(4, 12, '2025-12-18 12:50:00'), -- Kerem Öğle
+(5, 15, '2025-12-19 18:30:00'), -- Merih Başlangıç
+(5, 15, '2025-12-19 19:30:00'), -- Merih Ana Yemek
+(6, 17, '2025-12-20 20:30:00'), -- Apo Bar
+(7, 4, '2025-12-21 14:20:00'), -- Kenan Öğle
+(8, 7, '2025-12-22 19:50:00'), -- Semih Başlangıç
+(8, 7, '2025-12-22 20:30:00'), -- Semih Ana Yemek
+(9, 9, '2025-12-23 20:30:00'), -- İsmail Başlangıç
+(9, 9, '2025-12-23 21:15:00'), -- İsmail Ana Yemek
+(10, 11, '2025-12-24 18:50:00'), -- Salih Başlangıç
+(10, 11, '2025-12-24 19:45:00'), -- Salih Ana Yemek
+(11, 13, '2025-12-25 19:30:00'), -- Altay Sipariş
+(12, 15, '2025-12-26 20:30:00'), -- İrfan Başlangıç
+(12, 15, '2025-12-26 21:30:00'), -- İrfan Ana Yemek
+(13, 17, '2025-12-27 19:30:00'), -- Hakan Tekrar Başlangıç
+(13, 17, '2025-12-27 20:30:00'), -- Hakan Tekrar Ana Yemek
+(14, 5, '2025-12-28 17:30:00'), -- Arda Bahçe Başlangıç
+(14, 5, '2025-12-28 18:30:00'), -- Arda Bahçe Ana Yemek
+(15, 6, '2025-12-29 13:30:00'), -- Cenk Öğle
+(16, 9, '2025-12-30 18:30:00'), -- Ferdi Başlangıç
+(16, 9, '2025-12-30 19:30:00'), -- Ferdi Ana Yemek
+(17, 11, '2025-12-31 20:30:00'); -- Barış Yılbaşı
 
 -- 12. SİPARİŞ DETAYLARI (OrderDetails)
 INSERT INTO ORDERDETAILS (order_id, item_id, quantity, special_note) VALUES
@@ -242,10 +324,146 @@ INSERT INTO ORDERDETAILS (order_id, item_id, quantity, special_note) VALUES
 -- Arda'nın Masası (Diyet)
 (3, 5, 1, 'Sossuz, Izgara Sebzeli'), -- Levrek (Glutensiz)
 (3, 7, 1, 'Vegan Peynir ile'), -- Trüflü Risotto
-(3, 12, 2, 'Şekersiz'); -- 2 Limonata
+(3, 12, 2, 'Şekersiz'), -- 2 Limonata
+
+-- Mert Günok VIP
+(4, 1, 2, 'VIP servis'), -- 2 Carpaccio
+(4, 11, 1, 'En iyisi'), -- 1 Şişe Şarap
+(5, 3, 2, 'VIP'), -- 2 Wagyu Burger
+
+-- Kerem Aktürkoğlu Öğle
+(6, 5, 1, NULL), -- 1 Levrek
+(6, 12, 1, NULL), -- 1 Limonata
+
+-- Merih Demiral Bahçe
+(7, 2, 3, NULL), -- 3 Trüflü Patates
+(7, 6, 2, NULL), -- 2 Jumbo Karides
+(8, 4, 2, NULL), -- 2 Kuzu Kafes
+
+-- Apo Bar
+(9, 12, 2, 'Buzsuz'), -- 2 Limonata
+
+-- Kenan Yıldız Solo
+(10, 7, 1, 'Vegan'), -- 1 Trüflü Risotto
+(10, 12, 1, NULL), -- 1 Limonata
+
+-- Semih Kılıçsoy
+(11, 1, 1, NULL), -- 1 Carpaccio
+(12, 8, 1, NULL), -- 1 Linguine
+
+-- İsmail Yüksek
+(13, 2, 2, NULL), -- 2 Trüflü Patates
+(14, 3, 1, NULL), -- 1 Wagyu Burger
+(14, 9, 1, NULL), -- 1 Cheesecake
+
+-- Salih Özcan
+(15, 1, 3, NULL), -- 3 Carpaccio
+(15, 11, 1, NULL), -- 1 Şişe Şarap
+(16, 4, 2, NULL), -- 2 Kuzu Kafes
+
+-- Altay Bayındır
+(17, 5, 1, NULL), -- 1 Levrek
+(17, 10, 1, NULL), -- 1 Sufle
+
+-- İrfan Can Kahveci
+(18, 2, 2, NULL), -- 2 Trüflü Patates
+(19, 6, 2, NULL), -- 2 Jumbo Karides
+(19, 9, 2, NULL), -- 2 Cheesecake
+
+-- Hakan Tekrar
+(20, 1, 3, NULL), -- 3 Carpaccio
+(20, 11, 1, NULL), -- 1 Şişe Şarap
+(21, 4, 2, NULL), -- 2 Kuzu Kafes
+
+-- Arda Bahçe
+(22, 2, 2, NULL), -- 2 Trüflü Patates
+(23, 5, 2, NULL), -- 2 Levrek
+
+-- Cenk Öğle
+(24, 7, 1, NULL), -- 1 Risotto
+(24, 12, 1, NULL), -- 1 Limonata
+
+-- Ferdi Bahçe
+(25, 1, 3, NULL), -- 3 Carpaccio
+(26, 3, 2, NULL), -- 2 Wagyu Burger
+(26, 10, 2, NULL), -- 2 Sufle
+
+-- Barış Yılbaşı
+(27, 8, 1, NULL), -- 1 Linguine
+(27, 12, 1, NULL); -- 1 Limonata
 
 -- 13. GERİ BİLDİRİM (FEEDBACK)
 INSERT INTO FEEDBACK (session_id, rating, comment) VALUES
 (1, 5, 'Milli takım olarak çok iyi ağırlandık. Masaların birleştirilmesi harikaydı. - Hakan'),
-(2, 4, 'Yemekler lezzetliydi ama vegan seçenekler arttırılabilir. - Arda & Kenan');
+(2, 4, 'Yemekler lezzetliydi ama vegan seçenekler arttırılabilir. - Arda & Kenan'),
+(3, 5, 'VIP servis mükemmeldi, personel çok ilgili. - Mert'),
+(4, 4, 'Hızlı servis, lezzetli yemekler. - Kerem'),
+(5, 5, 'Bahçe atmosferi harikaydı, yemekler muhteşem. - Merih'),
+(6, 3, 'Bar kalabalıktı ama servis iyiydi. - Apo'),
+(7, 4, 'Solo yemek için ideal, huzurlu ortam. - Kenan'),
+(8, 4, 'Servis biraz yavaş ama yemekler iyi. - Semih'),
+(9, 5, 'VIP loca çok şık, her şey mükemmel. - İsmail'),
+(10, 5, 'Grup yemeği için çok uygun, büyük masa. - Salih'),
+(11, 4, 'Yemekler taze ve lezzetli. - Altay'),
+(12, 5, 'Profesyonel servis, yüksek kalite. - İrfan'),
+(13, 5, 'Tekrar geldiğim için memnunum. - Hakan'),
+(14, 4, 'Bahçe çok güzel, yemekler iyi. - Arda'),
+(15, 4, 'Öğle yemeği için ideal. - Cenk'),
+(16, 5, 'Grup için mükemmel mekan. - Ferdi'),
+(17, 4, 'Yılbaşı atmosferi güzeldi. - Barış');
+
+-- 14. TRIGGER: DININGSESSION TAMAMLANDIĞINDA MÜŞTERİ LTV GÜNCELLEME
+DELIMITER //
+CREATE TRIGGER trg_update_customer_ltv
+AFTER INSERT ON DININGSESSIONS
+FOR EACH ROW
+BEGIN
+    UPDATE CUSTOMERS
+    SET total_ltv = total_ltv + NEW.total_amount
+    WHERE customer_id = (
+        SELECT customer_id 
+        FROM RESERVATIONS r
+        WHERE r.reservation_id = NEW.reservation_id
+        );
+END;
+//
+ DELIMITER ;
+
+
+-- 15. TRIGGER: ORDER EKLERKEN GARSON VARDIYA KONTROLÜ 
+DELIMITER //
+CREATE TRIGGER trg_check_staff_shift
+BEFORE INSERT ON ORDERS
+FOR EACH ROW
+BEGIN
+    DECLARE order_day VARCHAR(20);
+    DECLARE shift_count INT;
+    
+    -- Sipariş gününü belirle (1=Pazar, 2=Pazartesi, vb.)
+    SET order_day = CASE DAYOFWEEK(NEW.order_time)
+        WHEN 1 THEN 'Pazar'
+        WHEN 2 THEN 'Pazartesi'
+        WHEN 3 THEN 'Salı'
+        WHEN 4 THEN 'Çarşamba'
+        WHEN 5 THEN 'Perşembe'
+        WHEN 6 THEN 'Cuma'
+        WHEN 7 THEN 'Cumartesi'
+        ELSE 'Bilinmiyor'
+    END;
+    
+    -- Vardiya kontrolü
+    SELECT COUNT(*) INTO shift_count
+    FROM SHIFTSCHEDULES
+    WHERE staff_id = NEW.staff_id
+      AND day_of_week = order_day
+      AND TIME(NEW.order_time) BETWEEN start_time AND end_time;
+    
+    IF shift_count = 0 THEN
+        -- Uyarı ver 
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Garson bu tarihte vardiyada değil, başka garson atandı.';
+       
+    END IF;
+END;
+//
+DELIMITER ;
 

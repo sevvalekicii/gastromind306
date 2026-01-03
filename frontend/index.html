@@ -50,6 +50,13 @@
             <!-- Siparişler Sayfası -->
             <section id="orders" class="page">
                 <h2>🛒 Siparişler</h2>
+                <!-- Tarihe göre filtreleme -->
+                <div class="filter-controls">
+                    <label for="order-date">Tarih Seç:</label>
+                    <input type="date" id="order-date">
+                    <button onclick="filterOrdersByDate()">Filtrele</button>
+                    <button onclick="loadOrders()">Tümünü Göster</button>
+                </div>
                 <div id="orders-list" class="content-area">
                     <p>Siparişler yükleniyor...</p>
                 </div>
@@ -59,11 +66,17 @@
             <section id="reports" class="page">
                 <h2>📊 Gelişmiş Raporlar</h2>
                 <div class="report-buttons">
-                    <button onclick="loadReport('top-customer-orders')">En Çok Harcayan Müşteri</button>
+                    <button onclick="loadReport('top-customer-orders')">En Yüksek Tutarlı Oturum</button>
                     <button onclick="loadReport('category-revenue')">Kategorilere Göre Satış</button>
                     <button onclick="loadReport('customer-spending')">Müşteri Harcamaları</button>
                     <button onclick="loadReport('customer-classification')">Müşteri Sınıflandırması</button>
                     <button onclick="loadReport('table-performance')">Masa Performansı</button>
+                    <button onclick="loadReport('customer-first-last-visit')">Müşteri Yaşam Döngüsü</button>
+                    <button onclick="loadReport('top-menu-items')">En Popüler Menü Öğeleri</button>
+                    <button onclick="loadReport('staff-performance')">Personel Performansı</button>
+                    <button onclick="loadReport('daily-revenue')">Günlük Ciro Raporu</button>
+                    <button onclick="loadReport('reservation-status-analysis')">Rezervasyon Analizi</button>
+                    <button onclick="loadReport('dietary-preferences')">Diyet Tercihleri</button>
                 </div>
                 <div id="reports-content" class="content-area">
                     <p>Rapor seçiniz...</p>

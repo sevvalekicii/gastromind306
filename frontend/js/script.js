@@ -114,9 +114,14 @@ async function loadReservations() {
 }
 
 // === SİPARİŞLER SAYFASI ===
-async function loadOrders() {
+async function loadOrders(date = null) {
     try {
-        const response = await fetch(`${API_BASE}/orders`);
+        // Tarihe göre filtreleme için URL oluşturma
+        let url = `${API_BASE}/orders`;
+        if (date) {
+            url += `?date=${date}`;
+        }
+        const response = await fetch(url);
         const data = await response.json();
         
         let html = '<table><thead><tr><th>Sipariş No</th><th>Müşteri</th><th>Tarih/Saat</th><th>Ürün Sayısı</th></tr></thead><tbody>';
@@ -142,6 +147,16 @@ async function loadOrders() {
     }
 }
 
+// Tarihe göre sipariş filtreleme
+async function filterOrdersByDate() {
+    const dateInput = document.getElementById('order-date').value;
+    if (dateInput) {
+        await loadOrders(dateInput);
+    } else {
+        alert('Lütfen bir tarih seçin.');
+    }
+}
+
 // === RAPORLAR SAYFASI ===
 async function loadReport(reportType) {
     try {
@@ -151,7 +166,7 @@ async function loadReport(reportType) {
         switch(reportType) {
             case 'top-customer-orders':
                 endpoint = '/reports/top-customer-orders';
-                tableHeaders = '<tr><th>Sipariş No</th><th>Müşteri</th><th>Tarih</th><th>Tutar</th></tr>';
+                tableHeaders = '<tr><th>Session ID</th><th>Müşteri</th><th>Toplam Tutar</th><th>Başlangıç Zamanı</th></tr>';
                 break;
             case 'category-revenue':
                 endpoint = '/reports/category-revenue';
@@ -169,6 +184,30 @@ async function loadReport(reportType) {
                 endpoint = '/reports/table-performance';
                 tableHeaders = '<tr><th>Masa No</th><th>Kapasite</th><th>Bölge</th><th>Ort. Ciro</th><th>Toplam Ciro</th></tr>';
                 break;
+            case 'customer-first-last-visit':
+                endpoint = '/reports/customer-first-last-visit';
+                tableHeaders = '<tr><th>Müşteri</th><th>İlk Ziyaret</th><th>Son Ziyaret</th><th>Gün Farkı</th></tr>';
+                break;
+            case 'top-menu-items':
+                endpoint = '/reports/top-menu-items';
+                tableHeaders = '<tr><th>Ürün</th><th>Kategori</th><th>Toplam Adet</th><th>Sipariş Sayısı</th><th>Ort. Fiyat</th></tr>';
+                break;
+            case 'staff-performance':
+                endpoint = '/reports/staff-performance';
+                tableHeaders = '<tr><th>Personel</th><th>Rol</th><th>Toplam Sipariş</th><th>Toplam Ciro</th><th>Ort. Sipariş</th></tr>';
+                break;
+            case 'daily-revenue':
+                endpoint = '/reports/daily-revenue';
+                tableHeaders = '<tr><th>Tarih</th><th>Oturum Sayısı</th><th>Günlük Ciro</th><th>Ort. Oturum</th></tr>';
+                break;
+            case 'reservation-status-analysis':
+                endpoint = '/reports/reservation-status-analysis';
+                tableHeaders = '<tr><th>Durum</th><th>Toplam Rezervasyon</th><th>Yüzde</th><th>Ort. Kişi</th></tr>';
+                break;
+            case 'dietary-preferences':
+                endpoint = '/reports/dietary-preferences';
+                tableHeaders = '<tr><th>Kısıtlama</th><th>Kategori</th><th>Sipariş Sayısı</th><th>Toplam Adet</th></tr>';
+                break;
         }
         
         const response = await fetch(`${API_BASE}${endpoint}`);
@@ -179,15 +218,29 @@ async function loadReport(reportType) {
         if (data && data.length > 0) {
             data.forEach(item => {
                 if (reportType === 'top-customer-orders') {
-                    html += `<tr><td>#${item.order_id}</td><td>${item.full_name}</td><td>${new Date(item.order_time).toLocaleString('tr-TR')}</td><td>₺${parseFloat(item.total_amount).toFixed(2)}</td></tr>`;
+                    const date = new Date(item.start_time).toLocaleString('tr-TR');
+                    html += `<tr><td>#${item.session_id}</td><td>${item.full_name}</td><td>₺${parseFloat(item.total_amount).toFixed(2)}</td><td>${date}</td></tr>`;
                 } else if (reportType === 'category-revenue') {
                     html += `<tr><td>${item.category_name}</td><td>₺${parseFloat(item.total_revenue).toFixed(2)}</td><td>${item.order_count}</td><td>₺${parseFloat(item.avg_order_value).toFixed(2)}</td></tr>`;
                 } else if (reportType === 'customer-spending') {
-                    html += `<tr><td>${item.full_name}</td><td>${item.visit_count}</td><td>₺${parseFloat(item.total_spent).toFixed(2)}</td><td>₺${parseFloat(item.avg_per_visit).toFixed(2)}</td><td>${new Date(item.last_visit).toLocaleDateString('tr-TR')}</td></tr>`;
+                    const date = new Date(item.last_visit).toLocaleDateString('tr-TR');
+                    html += `<tr><td>${item.full_name}</td><td>${item.visit_count}</td><td>₺${parseFloat(item.total_spent).toFixed(2)}</td><td>₺${parseFloat(item.avg_per_visit).toFixed(2)}</td><td>${date}</td></tr>`;
                 } else if (reportType === 'customer-classification') {
                     html += `<tr><td>${item.full_name}</td><td>${item.vip_status ? 'Evet' : 'Hayır'}</td><td>₺${parseFloat(item.total_ltv).toFixed(2)}</td><td><strong>${item.customer_tier}</strong></td></tr>`;
                 } else if (reportType === 'table-performance') {
                     html += `<tr><td>${item.table_id}</td><td>${item.capacity}</td><td>${item.location_zone}</td><td>₺${parseFloat(item.avg_revenue).toFixed(2)}</td><td>₺${parseFloat(item.total_revenue).toFixed(2)}</td></tr>`;
+                } else if (reportType === 'customer-first-last-visit') {
+                    html += `<tr><td>${item.full_name}</td><td>${new Date(item.first_visit).toLocaleDateString('tr-TR')}</td><td>${new Date(item.last_visit).toLocaleDateString('tr-TR')}</td><td>${item.customer_lifetime_days} gün</td></tr>`;
+                } else if (reportType === 'top-menu-items') {
+                    html += `<tr><td>${item.item_name}</td><td>${item.category_name}</td><td>${item.total_quantity}</td><td>${item.order_count}</td><td>₺${parseFloat(item.avg_price).toFixed(2)}</td></tr>`;
+                } else if (reportType === 'staff-performance') {
+                    html += `<tr><td>${item.name}</td><td>${item.role}</td><td>${item.total_orders}</td><td>₺${parseFloat(item.total_revenue).toFixed(2)}</td><td>₺${parseFloat(item.avg_order_value).toFixed(2)}</td></tr>`;
+                } else if (reportType === 'daily-revenue') {
+                    html += `<tr><td>${new Date(item.date).toLocaleDateString('tr-TR')}</td><td>${item.total_sessions}</td><td>₺${parseFloat(item.daily_revenue).toFixed(2)}</td><td>₺${parseFloat(item.avg_session_revenue).toFixed(2)}</td></tr>`;
+                } else if (reportType === 'reservation-status-analysis') {
+                    html += `<tr><td>${item.status}</td><td>${item.total_reservations}</td><td>%${parseFloat(item.percentage).toFixed(2)}</td><td>${parseFloat(item.avg_party_size).toFixed(1)}</td></tr>`;
+                } else if (reportType === 'dietary-preferences') {
+                    html += `<tr><td>${item.restriction_type}</td><td>${item.category_name}</td><td>${item.total_orders}</td><td>${item.total_quantity}</td></tr>`;
                 }
             });
         } else {

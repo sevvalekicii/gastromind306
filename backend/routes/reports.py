@@ -8,15 +8,13 @@ reports_bp = Blueprint('reports', __name__, url_prefix='/api/reports')
 # 1. NESTED QUERY: En çok harcayan müşterinin tüm siparişlerini getir
 @reports_bp.route('/top-customer-orders', methods=['GET'])
 def get_top_customer_orders():
-    """En çok harcayan müşterinin siparişlerini getir"""
+    """En yüksek tutarlı dining session'ı getir"""
     query = """
-    SELECT o.order_id, c.full_name, ds.session_id, o.order_time, ds.total_amount
-    FROM ORDERS o
-    JOIN DININGSESSIONS ds ON o.session_id = ds.session_id
+    SELECT ds.session_id, c.full_name, ds.total_amount, ds.start_time
+    FROM DININGSESSIONS ds
     JOIN RESERVATIONS r ON ds.reservation_id = r.reservation_id
     JOIN CUSTOMERS c ON r.customer_id = c.customer_id
-    WHERE r.customer_id = (SELECT customer_id FROM CUSTOMERS ORDER BY total_ltv DESC LIMIT 1)
-    ORDER BY o.order_time DESC
+    ORDER BY ds.total_amount DESC LIMIT 1
     """
     data = execute_query(query)
     return jsonify(data if data else [])
@@ -50,7 +48,7 @@ def get_customer_spending():
            COUNT(ds.session_id) as visit_count,
            SUM(ds.total_amount) as total_spent,
            ROUND(AVG(ds.total_amount), 2) as avg_per_visit,
-           MAX(ds.start_time) as last_visit
+           DATE_FORMAT(MAX(ds.start_time), '%Y-%m-%d') as last_visit
     FROM CUSTOMERS cust
     LEFT JOIN RESERVATIONS res ON cust.customer_id = res.customer_id
     LEFT JOIN DININGSESSIONS ds ON res.reservation_id = ds.reservation_id
@@ -96,6 +94,124 @@ def get_table_performance():
     LEFT JOIN DININGSESSIONS ds ON r.reservation_id = ds.reservation_id
     GROUP BY t.table_id, t.capacity, t.location_zone
     ORDER BY total_revenue DESC
+    """
+    data = execute_query(query)
+    return jsonify(data if data else [])
+
+# 6: Her müşterinin ilk ve son ziyareti + aradaki gün farkı
+@reports_bp.route('/customer-first-last-visit', methods=['GET'])
+def get_customer_first_last_visit():
+    """Her müşterinin ilk ve son ziyareti + aradaki gün farkı"""
+    query = """
+    SELECT cust.customer_id,
+        cust.full_name,
+        MIN(ds.start_time) AS first_visit,
+        MAX(ds.start_time) AS last_visit,
+        DATEDIFF(MAX(ds.start_time), MIN(ds.start_time)) AS customer_lifetime_days
+    FROM CUSTOMERS cust
+    JOIN RESERVATIONS r ON cust.customer_id = r.customer_id
+    JOIN DININGSESSIONS ds ON r.reservation_id = ds.reservation_id
+    GROUP BY cust.customer_id, cust.full_name;
+
+    """
+    data = execute_query(query)
+    return jsonify(data if data else [])
+
+# 7. GROUP BY - HAVING: En çok sipariş edilen menü öğeleri (Top 10)
+@reports_bp.route('/top-menu-items', methods=['GET'])
+def get_top_menu_items():
+    """En çok sipariş edilen menü öğelerini getir (top 10)"""
+    query = """
+    SELECT m.name AS item_name,
+           c.category_name,
+           SUM(od.quantity) AS total_quantity,
+           COUNT(DISTINCT o.order_id) AS order_count,
+           ROUND(AVG(m.price), 2) AS avg_price
+    FROM ORDERDETAILS od
+    JOIN MENUITEMS m ON od.item_id = m.item_id
+    JOIN CATEGORIES c ON m.category_id = c.category_id
+    JOIN ORDERS o ON od.order_id = o.order_id
+    GROUP BY m.item_id, m.name, c.category_name
+    HAVING SUM(od.quantity) > 0
+    ORDER BY total_quantity DESC
+    LIMIT 10
+    """
+    data = execute_query(query)
+    return jsonify(data if data else [])
+
+# 8. NESTED QUERY + GROUP BY: Personel satış performansı
+@reports_bp.route('/staff-performance', methods=['GET'])
+def get_staff_performance():
+    """Her personelin toplam sipariş sayısı ve cirosu"""
+    query = """
+    SELECT s.staff_id, s.name, s.role,
+           COUNT(DISTINCT o.order_id) AS total_orders,
+           SUM(ds.total_amount) AS total_revenue,
+           ROUND(AVG(ds.total_amount), 2) AS avg_order_value
+    FROM STAFF s
+    LEFT JOIN ORDERS o ON s.staff_id = o.staff_id
+    LEFT JOIN DININGSESSIONS ds ON o.session_id = ds.session_id
+    WHERE s.role IN ('Garson', 'Host')
+    GROUP BY s.staff_id, s.name, s.role
+    HAVING COUNT(DISTINCT o.order_id) > 0
+    ORDER BY total_revenue DESC
+    """
+    data = execute_query(query)
+    return jsonify(data if data else [])
+
+# 9. GROUP BY - HAVING: Günlük ciro raporu
+@reports_bp.route('/daily-revenue', methods=['GET'])
+def get_daily_revenue():
+    """Tarihe göre günlük toplam ciro"""
+    query = """
+    SELECT DATE(ds.start_time) AS date,
+           COUNT(DISTINCT ds.session_id) AS total_sessions,
+           SUM(ds.total_amount) AS daily_revenue,
+           ROUND(AVG(ds.total_amount), 2) AS avg_session_revenue
+    FROM DININGSESSIONS ds
+    GROUP BY DATE(ds.start_time)
+    HAVING SUM(ds.total_amount) > 0
+    ORDER BY date DESC
+    """
+    data = execute_query(query)
+    return jsonify(data if data else [])
+
+# 10. NESTED QUERY: Rezervasyon durumu analizi
+@reports_bp.route('/reservation-status-analysis', methods=['GET'])
+def get_reservation_status_analysis():
+    """Rezervasyon durumlarına göre analiz"""
+    query = """
+    SELECT r.status,
+           COUNT(*) AS total_reservations,
+           ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM RESERVATIONS), 2) AS percentage,
+           AVG(r.party_size) AS avg_party_size
+    FROM RESERVATIONS r
+    GROUP BY r.status
+    ORDER BY total_reservations DESC
+    """
+    data = execute_query(query)
+    return jsonify(data if data else [])
+
+# 11. COMPLEX JOIN + GROUP BY: Diyet kısıtlamalı müşterilerin tercihleri
+@reports_bp.route('/dietary-preferences', methods=['GET'])
+def get_dietary_preferences():
+    """Diyet kısıtlamalı müşterilerin en çok tercih ettikleri kategoriler"""
+    query = """
+    SELECT dr.restriction_type,
+           c.category_name,
+           COUNT(DISTINCT od.detail_id) AS total_orders,
+           SUM(od.quantity) AS total_quantity
+    FROM DIETARYRESTRICTIONS dr
+    JOIN CUSTOMERS cust ON dr.customer_id = cust.customer_id
+    JOIN RESERVATIONS r ON cust.customer_id = r.customer_id
+    JOIN DININGSESSIONS ds ON r.reservation_id = ds.reservation_id
+    JOIN ORDERS o ON ds.session_id = o.session_id
+    JOIN ORDERDETAILS od ON o.order_id = od.order_id
+    JOIN MENUITEMS m ON od.item_id = m.item_id
+    JOIN CATEGORIES c ON m.category_id = c.category_id
+    GROUP BY dr.restriction_type, c.category_name
+    HAVING COUNT(DISTINCT od.detail_id) > 0
+    ORDER BY dr.restriction_type, total_orders DESC
     """
     data = execute_query(query)
     return jsonify(data if data else [])
