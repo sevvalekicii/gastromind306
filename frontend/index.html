@@ -3,99 +3,673 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GastroMind - Restoran Yönetim Sistemi</title>
+    <title>GastroMind | Restoran Yönetim Paneli</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🍽️ GastroMind</h1>
-            <p>Profesyonel Restoran Yönetim Sistemi</p>
-        </header>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">◈</span>
+                    <span class="logo-text">GastroMind</span>
+                </div>
+                <span class="version">v2.0</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-section-title">Ana Menü</span>
+                    <a href="#dashboard" class="nav-item active" data-page="dashboard">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#menu" class="nav-item" data-page="menu">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18M3 12h18M3 18h18"></path>
+                        </svg>
+                        <span>Menü Yönetimi</span>
+                    </a>
+                    <a href="#customers" class="nav-item" data-page="customers">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span>Müşteriler</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <span class="nav-section-title">Operasyonlar</span>
+                    <a href="#reservations" class="nav-item" data-page="reservations">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span>Rezervasyonlar</span>
+                    </a>
+                    <a href="#orders" class="nav-item" data-page="orders">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        <span>Siparişler</span>
+                    </a>
+                    <a href="#tables" class="nav-item" data-page="tables">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                            <path d="M3 9h18M9 21V9"></path>
+                        </svg>
+                        <span>Masa Durumu</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <span class="nav-section-title">Analitik</span>
+                    <a href="#reports" class="nav-item" data-page="reports">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        <span>Raporlar</span>
+                    </a>
+                    <a href="#feedback" class="nav-item" data-page="feedback">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        <span>Geri Bildirimler</span>
+                    </a>
+                    <a href="#staff" class="nav-item" data-page="staff">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <line x1="19" y1="8" x2="19" y2="14"></line>
+                            <line x1="22" y1="11" x2="16" y2="11"></line>
+                        </svg>
+                        <span>Personel</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">YK</div>
+                    <div class="user-details">
+                        <span class="user-name">Yönetici</span>
+                        <span class="user-role">Admin Panel</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
 
-        <nav class="navbar">
-            <a href="#menu">Menü</a>
-            <a href="#customers">Müşteriler</a>
-            <a href="#reservations">Rezervasyonlar</a>
-            <a href="#orders">Siparişler</a>
-            <a href="#reports">Raporlar</a>
-            <a href="#feedback">Geri Bildirim</a>
-        </nav>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="page-title">
+                        <h1 id="currentPageTitle">Dashboard</h1>
+                        <span class="breadcrumb">Ana Sayfa / <span id="breadcrumbCurrent">Genel Bakış</span></span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <input type="text" placeholder="Müşteri, menü ara..." id="globalSearch" onkeyup="globalSearchHandler(event)">
+                    </div>
+                    <div class="header-actions">
+                        <div class="notification-wrapper">
+                            <button class="header-btn notification-btn" onclick="toggleNotifications()" id="notificationBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                </svg>
+                                <span class="notification-badge" id="notificationCount">3</span>
+                            </button>
+                            <!-- Notification Dropdown -->
+                            <div class="notification-dropdown" id="notificationDropdown">
+                                <div class="notification-header">
+                                    <h4>Bildirimler</h4>
+                                    <button class="btn-clear" onclick="clearNotifications()">Temizle</button>
+                                </div>
+                                <div class="notification-list" id="notificationList">
+                                    <!-- Notifications will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                        <button class="header-btn" id="refreshData" title="Verileri Yenile">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </header>
 
-        <main>
-            <!-- Menü Sayfası -->
-            <section id="menu" class="page">
-                <h2>📖 Menü</h2>
-                <div id="menu-list" class="content-area">
-                    <p>Menü yükleniyor...</p>
-                </div>
-            </section>
+            <!-- Content Area -->
+            <div class="content-wrapper">
+                <!-- Dashboard Page -->
+                <section id="dashboard" class="page active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-value" id="totalCustomers">-</span>
+                                <span class="stat-label">Toplam Müşteri</span>
+                            </div>
+                            <span class="stat-trend up">+12%</span>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-value" id="totalRevenue">-</span>
+                                <span class="stat-label">Toplam Ciro</span>
+                            </div>
+                            <span class="stat-trend up">+8.2%</span>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-value" id="totalReservations">-</span>
+                                <span class="stat-label">Rezervasyonlar</span>
+                            </div>
+                            <span class="stat-trend down">-2%</span>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon purple">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-value" id="avgRating">-</span>
+                                <span class="stat-label">Ortalama Puan</span>
+                            </div>
+                            <span class="stat-trend up">+0.3</span>
+                        </div>
+                    </div>
 
-            <!-- Müşteriler Sayfası -->
-            <section id="customers" class="page">
-                <h2>👥 Müşteriler</h2>
-                <div id="customers-list" class="content-area">
-                    <p>Müşteriler yükleniyor...</p>
-                </div>
-            </section>
+                    <div class="dashboard-grid">
+                        <div class="card recent-orders">
+                            <div class="card-header">
+                                <h3>Son Siparişler</h3>
+                                <a href="#orders" class="view-all" data-page="orders">Tümünü Gör →</a>
+                            </div>
+                            <div class="card-body">
+                                <div id="recentOrdersList" class="list-container">
+                                    <div class="loading-placeholder">Yükleniyor...</div>
+                                </div>
+                            </div>
+                        </div>
 
-            <!-- Rezervasyonlar Sayfası -->
-            <section id="reservations" class="page">
-                <h2>📅 Rezervasyonlar</h2>
-                <div id="reservations-list" class="content-area">
-                    <p>Rezervasyonlar yükleniyor...</p>
-                </div>
-            </section>
+                        <div class="card top-customers">
+                            <div class="card-header">
+                                <h3>VIP Müşteriler</h3>
+                                <a href="#customers" class="view-all" data-page="customers">Tümünü Gör →</a>
+                            </div>
+                            <div class="card-body">
+                                <div id="vipCustomersList" class="list-container">
+                                    <div class="loading-placeholder">Yükleniyor...</div>
+                                </div>
+                            </div>
+                        </div>
 
-            <!-- Siparişler Sayfası -->
-            <section id="orders" class="page">
-                <h2>🛒 Siparişler</h2>
-                <!-- Tarihe göre filtreleme -->
-                <div class="filter-controls">
-                    <label for="order-date">Tarih Seç:</label>
-                    <input type="date" id="order-date">
-                    <button onclick="filterOrdersByDate()">Filtrele</button>
-                    <button onclick="loadOrders()">Tümünü Göster</button>
-                </div>
-                <div id="orders-list" class="content-area">
-                    <p>Siparişler yükleniyor...</p>
-                </div>
-            </section>
+                        <div class="card rating-overview">
+                            <div class="card-header">
+                                <h3>Puan Dağılımı</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="ratingDistribution" class="rating-bars">
+                                    <div class="loading-placeholder">Yükleniyor...</div>
+                                </div>
+                            </div>
+                        </div>
 
-            <!-- Raporlar Sayfası -->
-            <section id="reports" class="page">
-                <h2>📊 Gelişmiş Raporlar</h2>
-                <div class="report-buttons">
-                    <button onclick="loadReport('top-customer-orders')">En Yüksek Tutarlı Oturum</button>
-                    <button onclick="loadReport('category-revenue')">Kategorilere Göre Satış</button>
-                    <button onclick="loadReport('customer-spending')">Müşteri Harcamaları</button>
-                    <button onclick="loadReport('customer-classification')">Müşteri Sınıflandırması</button>
-                    <button onclick="loadReport('table-performance')">Masa Performansı</button>
-                    <button onclick="loadReport('customer-first-last-visit')">Müşteri Yaşam Döngüsü</button>
-                    <button onclick="loadReport('top-menu-items')">En Popüler Menü Öğeleri</button>
-                    <button onclick="loadReport('staff-performance')">Personel Performansı</button>
-                    <button onclick="loadReport('daily-revenue')">Günlük Ciro Raporu</button>
-                    <button onclick="loadReport('reservation-status-analysis')">Rezervasyon Analizi</button>
-                    <button onclick="loadReport('dietary-preferences')">Diyet Tercihleri</button>
-                </div>
-                <div id="reports-content" class="content-area">
-                    <p>Rapor seçiniz...</p>
-                </div>
-            </section>
+                        <div class="card upcoming-reservations">
+                            <div class="card-header">
+                                <h3>Bekleyen Rezervasyonlar</h3>
+                                <button class="btn btn-sm btn-primary" onclick="openModal('reservationModal')">+ Yeni</button>
+                            </div>
+                            <div class="card-body">
+                                <div id="pendingReservationsList" class="list-container">
+                                    <div class="loading-placeholder">Yükleniyor...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
-            <!-- Geri Bildirim Sayfası -->
-            <section id="feedback" class="page">
-                <h2>⭐ Geri Bildirim</h2>
-                <div id="feedback-list" class="content-area">
-                    <p>Geri bildirimler yükleniyor...</p>
-                </div>
-            </section>
+                <!-- Menu Page -->
+                <section id="menu" class="page">
+                    <div class="page-actions">
+                        <div class="filter-group">
+                            <select id="categoryFilter" class="form-select">
+                                <option value="">Tüm Kategoriler</option>
+                            </select>
+                        </div>
+                        <div class="search-filter">
+                            <input type="text" id="menuSearch" placeholder="Menüde ara..." class="form-input">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="data-table" id="menuTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Ürün Adı</th>
+                                            <th>Kategori</th>
+                                            <th>Fiyat</th>
+                                            <th>Hazırlama Süresi</th>
+                                            <th>Durum</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="menuTableBody">
+                                        <tr><td colspan="5" class="loading-cell">Yükleniyor...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Customers Page -->
+                <section id="customers" class="page">
+                    <div class="page-actions">
+                        <div class="filter-group">
+                            <button class="filter-btn active" data-filter="all">Tümü</button>
+                            <button class="filter-btn" data-filter="vip">VIP</button>
+                            <button class="filter-btn" data-filter="regular">Regular</button>
+                        </div>
+                        <button class="btn btn-success" onclick="openModal('addCustomerModal')">
+                            <span>➕</span> Yeni Müşteri
+                        </button>
+                        <div class="search-filter">
+                            <input type="text" id="customerSearch" placeholder="Müşteri ara..." class="form-input">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="data-table" id="customersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Müşteri</th>
+                                            <th>İletişim</th>
+                                            <th>Toplam Harcama</th>
+                                            <th>Durum</th>
+                                            <th>Diyet</th>
+                                            <th>İşlem</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customersTableBody">
+                                        <tr><td colspan="6" class="loading-cell">Yükleniyor...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Reservations Page -->
+                <section id="reservations" class="page">
+                    <div class="page-actions">
+                        <div class="filter-group">
+                            <button class="filter-btn active" data-filter="all">Tümü</button>
+                            <button class="filter-btn" data-filter="Pending">Bekleyen</button>
+                            <button class="filter-btn" data-filter="Confirmed">Onaylı</button>
+                            <button class="filter-btn" data-filter="Completed">Tamamlanan</button>
+                        </div>
+                        <button class="btn btn-primary" onclick="openModal('reservationModal')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Yeni Rezervasyon
+                        </button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="data-table" id="reservationsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Müşteri</th>
+                                            <th>Masa</th>
+                                            <th>Tarih / Saat</th>
+                                            <th>Kişi Sayısı</th>
+                                            <th>Durum</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reservationsTableBody">
+                                        <tr><td colspan="5" class="loading-cell">Yükleniyor...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Orders Page -->
+                <section id="orders" class="page">
+                    <div class="page-actions">
+                        <div class="filter-group">
+                            <label class="filter-label">Tarih:</label>
+                            <input type="date" id="orderDateFilter" class="form-input">
+                            <button class="btn btn-secondary" onclick="filterOrders()">Filtrele</button>
+                            <button class="btn btn-outline" onclick="loadOrders()">Temizle</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="data-table" id="ordersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Sipariş No</th>
+                                            <th>Müşteri</th>
+                                            <th>Tarih / Saat</th>
+                                            <th>Ürün Sayısı</th>
+                                            <th>İşlem</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ordersTableBody">
+                                        <tr><td colspan="5" class="loading-cell">Yükleniyor...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tables Page -->
+                <section id="tables" class="page">
+                    <div class="page-header-info">
+                        <p>Masa durumları ve performans analizi</p>
+                    </div>
+                    <div class="tables-grid" id="tablesGrid">
+                        <div class="loading-placeholder">Yükleniyor...</div>
+                    </div>
+                </section>
+
+                <!-- Reports Page -->
+                <section id="reports" class="page">
+                    <div class="reports-nav">
+                        <button class="report-tab active" data-report="category-revenue">Kategori Satışları</button>
+                        <button class="report-tab" data-report="customer-spending">Müşteri Harcamaları</button>
+                        <button class="report-tab" data-report="customer-classification">Müşteri Sınıflandırması</button>
+                        <button class="report-tab" data-report="table-performance">Masa Performansı</button>
+                        <button class="report-tab" data-report="top-menu-items">Popüler Ürünler</button>
+                        <button class="report-tab" data-report="staff-performance">Personel Performansı</button>
+                        <button class="report-tab" data-report="daily-revenue">Günlük Ciro</button>
+                        <button class="report-tab" data-report="customer-first-last-visit">Müşteri Yaşam Döngüsü</button>
+                        <button class="report-tab" data-report="reservation-status-analysis">Rezervasyon Analizi</button>
+                        <button class="report-tab" data-report="dietary-preferences">Diyet Tercihleri</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 id="reportTitle">Kategori Bazlı Satış Raporu</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="data-table" id="reportTable">
+                                    <thead id="reportTableHead">
+                                        <tr><th>Yükleniyor...</th></tr>
+                                    </thead>
+                                    <tbody id="reportTableBody">
+                                        <tr><td class="loading-cell">Rapor seçiniz...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Feedback Page -->
+                <section id="feedback" class="page">
+                    <div class="page-actions">
+                        <div class="feedback-stats" id="feedbackStats">
+                            <!-- Stats will be loaded here -->
+                        </div>
+                        <button class="btn btn-primary" onclick="openModal('feedbackModal')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Yeni Geri Bildirim
+                        </button>
+                    </div>
+                    <div class="feedback-grid" id="feedbackGrid">
+                        <div class="loading-placeholder">Yükleniyor...</div>
+                    </div>
+                </section>
+
+                <!-- Staff Page -->
+                <section id="staff" class="page">
+                    <div class="page-header-info">
+                        <p>Personel performans analizi ve istatistikleri</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="data-table" id="staffTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Personel</th>
+                                            <th>Rol</th>
+                                            <th>Toplam Sipariş</th>
+                                            <th>Toplam Ciro</th>
+                                            <th>Ort. Sipariş Değeri</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="staffTableBody">
+                                        <tr><td colspan="5" class="loading-cell">Yükleniyor...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </main>
-
-        <footer>
-            <p>&copy; 2026 GastroMind - Grup Projesi | COMP 306</p>
-        </footer>
     </div>
+
+    <!-- Modals -->
+    <!-- Reservation Modal -->
+    <div class="modal-overlay" id="reservationModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Yeni Rezervasyon</h3>
+                <button class="modal-close" onclick="closeModal('reservationModal')">&times;</button>
+            </div>
+            <form id="reservationForm" onsubmit="submitReservation(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Müşteri</label>
+                        <select id="resCustomerId" class="form-select" required>
+                            <option value="">Müşteri Seçin</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Masa</label>
+                            <select id="resTableId" class="form-select" required>
+                                <option value="">Masa Seçin</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Kişi Sayısı</label>
+                            <input type="number" id="resPartySize" class="form-input" min="1" max="20" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tarih ve Saat</label>
+                        <input type="datetime-local" id="resDateTime" class="form-input" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('reservationModal')">İptal</button>
+                    <button type="submit" class="btn btn-primary">Rezervasyon Oluştur</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Yeni Geri Bildirim</h3>
+                <button class="modal-close" onclick="closeModal('feedbackModal')">&times;</button>
+            </div>
+            <form id="feedbackForm" onsubmit="submitFeedback(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Oturum ID</label>
+                        <input type="number" id="fbSessionId" class="form-input" placeholder="Session ID" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Puan</label>
+                        <div class="rating-input" id="ratingInput">
+                            <span class="star" data-value="1">★</span>
+                            <span class="star" data-value="2">★</span>
+                            <span class="star" data-value="3">★</span>
+                            <span class="star" data-value="4">★</span>
+                            <span class="star" data-value="5">★</span>
+                        </div>
+                        <input type="hidden" id="fbRating" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Yorum</label>
+                        <textarea id="fbComment" class="form-textarea" rows="4" placeholder="Deneyiminizi paylaşın..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('feedbackModal')">İptal</button>
+                    <button type="submit" class="btn btn-primary">Gönder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="modal-overlay" id="orderDetailsModal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3>Sipariş Detayları</h3>
+                <button class="modal-close" onclick="closeModal('orderDetailsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="orderDetailsContent">
+                    <div class="loading-placeholder">Yükleniyor...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('orderDetailsModal')">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Dietary Modal -->
+    <div class="modal-overlay" id="dietaryModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Diyet Kısıtlamaları</h3>
+                <button class="modal-close" onclick="closeModal('dietaryModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="dietaryContent">
+                    <div class="loading-placeholder">Yükleniyor...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('dietaryModal')">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Customer Modal (CRUD - CREATE) -->
+    <div class="modal-overlay" id="addCustomerModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h3>🆕 Yeni Müşteri Ekle</h3>
+                </div>
+                <button class="modal-close" onclick="closeModal('addCustomerModal')">&times;</button>
+            </div>
+            <form id="addCustomerForm" onsubmit="addCustomer(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Ad Soyad <span class="required">*</span></label>
+                        <input type="text" id="newCustName" class="form-input" placeholder="Örn: Ahmet Yılmaz" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Telefon</label>
+                            <input type="tel" id="newCustPhone" class="form-input" placeholder="0532 xxx xx xx">
+                        </div>
+                        <div class="form-group">
+                            <label>E-posta</label>
+                            <input type="email" id="newCustEmail" class="form-input" placeholder="email@example.com">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="newCustVip">
+                            <span>VIP Müşteri</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('addCustomerModal')">İptal</button>
+                    <button type="submit" class="btn btn-success">Müşteri Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
 
     <script src="js/script.js"></script>
 </body>

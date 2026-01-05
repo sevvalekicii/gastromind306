@@ -215,3 +215,22 @@ def get_dietary_preferences():
     """
     data = execute_query(query)
     return jsonify(data if data else [])
+
+# 12. DATE FUNCTIONS: Müşteri yaşam döngüsü analizi
+@reports_bp.route('/customer-lifecycle', methods=['GET'])
+def get_customer_lifecycle():
+    """Müşterilerin ilk/son ziyaret ve yaşam süresi"""
+    query = """
+    SELECT cust.customer_id, cust.full_name,
+           MIN(ds.start_time) AS first_visit,
+           MAX(ds.start_time) AS last_visit,
+           DATEDIFF(MAX(ds.start_time), MIN(ds.start_time)) AS customer_lifetime_days,
+           COUNT(ds.session_id) AS total_visits
+    FROM CUSTOMERS cust
+    JOIN RESERVATIONS r ON cust.customer_id = r.customer_id
+    JOIN DININGSESSIONS ds ON r.reservation_id = ds.reservation_id
+    GROUP BY cust.customer_id, cust.full_name
+    ORDER BY customer_lifetime_days DESC
+    """
+    data = execute_query(query)
+    return jsonify(data if data else [])

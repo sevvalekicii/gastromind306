@@ -4,7 +4,7 @@
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': '1234',  # 👈 BURAYA KENDİ MySQL ŞİFRENİ YAZ
+    'password': '71841527184152eK*',
     'database': 'GastroMind_DB'
 }
 
