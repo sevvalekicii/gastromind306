@@ -351,16 +351,31 @@ function loadPageData(pageId) {
 function initSidebar() {
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.querySelector('.sidebar');
+    const appContainer = document.querySelector('.app-container');
     
+    // Toggle sidebar on button click
     menuToggle?.addEventListener('click', () => {
-        sidebar.classList.toggle('active');
+        sidebar.classList.toggle('collapsed');
+        appContainer.classList.toggle('sidebar-collapsed');
+        
+        // Save state to localStorage
+        const isCollapsed = sidebar.classList.contains('collapsed');
+        localStorage.setItem('sidebarCollapsed', isCollapsed);
     });
+    
+    // Restore sidebar state from localStorage
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    if (savedState === 'true') {
+        sidebar.classList.add('collapsed');
+        appContainer.classList.add('sidebar-collapsed');
+    }
     
     // Close sidebar on outside click (mobile)
     document.addEventListener('click', (e) => {
         if (window.innerWidth <= 992) {
             if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                sidebar.classList.remove('active');
+                sidebar.classList.add('collapsed');
+                appContainer.classList.add('sidebar-collapsed');
             }
         }
     });
@@ -454,10 +469,15 @@ function renderVipCustomers(customers) {
         return;
     }
     
-    container.innerHTML = customers.map(customer => `
+    container.innerHTML = customers.map(customer => {
+        const photoUrl = getCustomerPhoto(customer.full_name);
+        return `
         <div class="list-item">
             <div class="list-item-info">
-                <div class="list-item-avatar">${getInitials(customer.full_name)}</div>
+                ${photoUrl 
+                    ? `<img src="${photoUrl}" alt="${customer.full_name}" class="customer-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="list-item-avatar" style="display:none">${getInitials(customer.full_name)}</div>`
+                    : `<div class="list-item-avatar">${getInitials(customer.full_name)}</div>`
+                }
                 <div class="list-item-text">
                     <h4>${customer.full_name}</h4>
                     <span>VIP Üye</span>
@@ -465,7 +485,7 @@ function renderVipCustomers(customers) {
             </div>
             <span class="list-item-value">${formatCurrency(customer.total_ltv)}</span>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function renderRatingDistribution(feedback) {
@@ -502,10 +522,15 @@ function renderPendingReservations(reservations) {
         return;
     }
     
-    container.innerHTML = reservations.map(res => `
+    container.innerHTML = reservations.map(res => {
+        const photoUrl = getCustomerPhoto(res.full_name);
+        return `
         <div class="list-item">
             <div class="list-item-info">
-                <div class="list-item-avatar">${getInitials(res.full_name)}</div>
+                ${photoUrl 
+                    ? `<img src="${photoUrl}" alt="${res.full_name}" class="customer-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="list-item-avatar" style="display:none">${getInitials(res.full_name)}</div>`
+                    : `<div class="list-item-avatar">${getInitials(res.full_name)}</div>`
+                }
                 <div class="list-item-text">
                     <h4>${res.full_name}</h4>
                     <span>Masa ${res.table_id} • ${res.party_size} kişi</span>
@@ -513,7 +538,7 @@ function renderPendingReservations(reservations) {
             </div>
             <span class="status-badge pending">Bekliyor</span>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 // =====================================================
@@ -528,27 +553,113 @@ async function loadMenu() {
         initMenuFilters();
     } catch (error) {
         console.error('Menu error:', error);
-        document.getElementById('menuTableBody').innerHTML = 
-            '<tr><td colspan="5" class="loading-cell">Menü yüklenemedi</td></tr>';
+        document.getElementById('menuGrid').innerHTML = 
+            '<div class="loading-cell">Menü yüklenemedi</div>';
     }
 }
 
 function renderMenuTable(items) {
-    const tbody = document.getElementById('menuTableBody');
-    if (!items?.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="loading-cell">Menü öğesi bulunamadı</td></tr>';
+    const menuGrid = document.getElementById('menuGrid');
+    
+    // API'den error dönerse veya array değilse
+    if (!items || items.error || !Array.isArray(items) || items.length === 0) {
+        menuGrid.innerHTML = '<div class="loading-cell">Menü öğesi bulunamadı veya veritabanı bağlantı hatası</div>';
         return;
     }
     
-    tbody.innerHTML = items.map(item => `
-        <tr>
-            <td><strong>${item.Yemek}</strong></td>
-            <td>${item.Kategori}</td>
-            <td><strong>${formatCurrency(item.Fiyat)}</strong></td>
-            <td>${item.Hazirlanma} dk</td>
-            <td><span class="status-badge active">Aktif</span></td>
-        </tr>
-    `).join('');
+    menuGrid.innerHTML = items.map(item => {
+        const imageUrl = getMenuItemImage(item.Kategori, item.Yemek);
+        return `
+            <div class="menu-card" onclick="showMenuItemImage('${item.Yemek}', '${imageUrl}', '${item.Kategori}', '${formatCurrency(item.Fiyat)}')">
+                <div class="menu-card-image">
+                    <img src="${imageUrl}" alt="${item.Yemek}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'">
+                    <span class="menu-card-category">${item.Kategori}</span>
+                </div>
+                <div class="menu-card-content">
+                    <h3 class="menu-card-title">${item.Yemek}</h3>
+                    <div class="menu-card-info">
+                        <span class="menu-card-time">⏱️ ${item.Hazirlanma} dk</span>
+                        <span class="status-badge active">Aktif</span>
+                    </div>
+                    <div class="menu-card-price">${formatCurrency(item.Fiyat)}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Menü fotoğrafını modal'da göster
+function showMenuItemImage(yemekAdi, imageUrl, kategori, fiyat) {
+    const existingModal = document.getElementById('menuImageModal');
+    if (existingModal) existingModal.remove();
+    
+    const modal = document.createElement('div');
+    modal.id = 'menuImageModal';
+    modal.className = 'table-image-modal';
+    modal.innerHTML = `
+        <div class="table-image-overlay" onclick="closeMenuImageModal()"></div>
+        <div class="table-image-content menu-image-content">
+            <button class="table-image-close" onclick="closeMenuImageModal()">&times;</button>
+            <img src="${imageUrl}" alt="${yemekAdi}" class="table-image-img" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'">
+            <div class="menu-image-info">
+                <h3>${yemekAdi}</h3>
+                <span class="menu-image-category">${kategori}</span>
+                <span class="menu-image-price">${fiyat}</span>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+function closeMenuImageModal() {
+    const modal = document.getElementById('menuImageModal');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+function getMenuItemImage(kategori, yemekAdi) {
+    // Yemek bazlı fotoğraflar (dosya adı = yemek adı)
+    const menuPhotos = {
+        'Dana Carpaccio': 'Dana Carpaccio.webp',
+        'Trüflü Patates': 'Trüflü Patates.jpg',
+        'Wagyu Burger': 'Wagyu Burger.jpg',
+        'Kuzu Kafes (2 Kişilik)': 'Kuzu Kafes (2 Kişilik).webp',
+        'Izgara Levrek': 'Izgara Levrek.jpg',
+        'Jumbo Karides': 'Jumbo Karides.jpg',
+        'Trüflü Risotto': 'Trüflü Risotto.jpg',
+        'Deniz Mahsullü Linguine': 'Deniz Mahsullü Linguine.jpg',
+        'San Sebastian Cheesecake': 'San Sebastian Cheesecake.jpg',
+        'Çikolatalı Sufle': 'Çikolatalı Sufle.webp',
+        'Château Margaux (Şişe)': 'Château Margaux (Şişe).jpg',
+        'Ev Yapımı Limonata': 'Ev Yapımı Limonata.jpg'
+    };
+    
+    // Önce yemek bazlı fotoğraf var mı kontrol et
+    if (menuPhotos[yemekAdi]) {
+        return `images/menu/${menuPhotos[yemekAdi]}`;
+    }
+    
+    // Yoksa kategoriye göre varsayılan görsel URL'leri (Unsplash)
+    const categoryImages = {
+        'Başlangıçlar': 'https://images.unsplash.com/photo-1541014741259-de529411b96a?w=400&h=300&fit=crop',
+        'Ana Yemekler': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop',
+        'Salatalar': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop',
+        'Tatlılar': 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=300&fit=crop',
+        'İçecekler': 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
+        'Corbalar': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=300&fit=crop',
+        'Çorbalar': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=300&fit=crop',
+        'Pizzalar': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop',
+        'Burgerler': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop',
+        'Makarnalar': 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400&h=300&fit=crop',
+        'Deniz Ürünleri': 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=400&h=300&fit=crop',
+        'Izgara': 'https://images.unsplash.com/photo-1558030006-450675393462?w=400&h=300&fit=crop',
+        'Kahvaltı': 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400&h=300&fit=crop'
+    };
+    
+    return categoryImages[kategori] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop';
 }
 
 async function loadCategories() {
@@ -608,11 +719,16 @@ function renderCustomersTable(customers) {
         return;
     }
     
-    tbody.innerHTML = customers.map(c => `
+    tbody.innerHTML = customers.map(c => {
+        const photoUrl = getCustomerPhoto(c.full_name);
+        return `
         <tr>
             <td>
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <div class="list-item-avatar">${getInitials(c.full_name)}</div>
+                    ${photoUrl 
+                        ? `<img src="${photoUrl}" alt="${c.full_name}" class="customer-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="list-item-avatar" style="display:none">${getInitials(c.full_name)}</div>`
+                        : `<div class="list-item-avatar">${getInitials(c.full_name)}</div>`
+                    }
                     <strong>${c.full_name}</strong>
                 </div>
             </td>
@@ -642,7 +758,34 @@ function renderCustomersTable(customers) {
                 </div>
             </td>
         </tr>
-    `).join('');
+    `}).join('');
+}
+
+// Müşteri fotoğrafı al - isim bazlı
+function getCustomerPhoto(fullName) {
+    // Fotoğrafı olan müşteriler (dosya adı = tam isim.webp)
+    const customerPhotos = {
+        'Hakan Çalhanoğlu': 'Hakan Çalhanoğlu.webp',
+        'Arda Güler': 'Arda Güler.webp',
+        'Cenk Tosun': 'Cenk Tosun.webp',
+        'Mert Günok': 'Mert Günok.webp',
+        'Kerem Aktürkoğlu': 'Kerem Aktürkoğlu.webp',
+        'Ferdi Kadıoğlu': 'Ferdi Kadıoğlu.webp',
+        'Barış Alper Yılmaz': 'Barış Alper Yılmaz.webp',
+        'Merih Demiral': 'Merih Demiral.webp',
+        'Abdülkerim Bardakcı': 'Abdülkerim Bardakcı.webp',
+        'Kenan Yıldız': 'Kenan Yıldız.webp',
+        'Semih Kılıçsoy': 'Semih Kılıçsoy.webp',
+        'İsmail Yüksek': 'İsmail Yüksek.webp',
+        'Salih Özcan': 'Salih Özcan.webp',
+        'Altay Bayındır': 'Altay Bayındır.webp',
+        'İrfan Can Kahveci': 'İrfan Can Kahveci.webp'
+    };
+    
+    if (customerPhotos[fullName]) {
+        return `images/customers/${customerPhotos[fullName]}`;
+    }
+    return null;
 }
 
 function initCustomerFilters() {
@@ -933,8 +1076,10 @@ function renderTablesGrid(tables) {
         return;
     }
     
-    container.innerHTML = tables.map(t => `
-        <div class="table-card">
+    container.innerHTML = tables.map(t => {
+        const bgImage = getTableBackgroundImage(t.location_zone);
+        return `
+        <div class="table-card" onclick="showTableImage('${t.location_zone}', '${bgImage}')" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url('${bgImage}'); background-size: cover; background-position: center; cursor: pointer;">
             <div class="table-card-header">
                 <h4>Masa ${t.table_id}</h4>
                 <span class="status-badge ${t.completed_sessions > 0 ? 'active' : 'pending'}">
@@ -964,7 +1109,52 @@ function renderTablesGrid(tables) {
                 </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
+}
+
+// Masa fotoğrafını modal'da göster
+function showTableImage(locationZone, imageUrl) {
+    // Modal oluştur
+    const existingModal = document.getElementById('tableImageModal');
+    if (existingModal) existingModal.remove();
+    
+    const modal = document.createElement('div');
+    modal.id = 'tableImageModal';
+    modal.className = 'table-image-modal';
+    modal.innerHTML = `
+        <div class="table-image-overlay" onclick="closeTableImageModal()"></div>
+        <div class="table-image-content">
+            <button class="table-image-close" onclick="closeTableImageModal()">&times;</button>
+            <h3 class="table-image-title">${locationZone}</h3>
+            <img src="${imageUrl}" alt="${locationZone}" class="table-image-img">
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // Animasyon için küçük gecikme
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+function closeTableImageModal() {
+    const modal = document.getElementById('tableImageModal');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
+// Masa bölgesine göre arka plan fotoğrafı
+function getTableBackgroundImage(locationZone) {
+    const tableImages = {
+        'Cam Kenarı A': 'images/tables/Cam Kenarı A.webp',
+        'Salon Merkez': 'images/tables/Salon Merkez.webp',
+        'VIP Loca': 'images/tables/VIP Loca.webp',
+        'Teras': 'images/tables/Teras.webp',
+        'Bar': 'images/tables/Bar.webp',
+        'Bahçe': 'images/tables/Bahçe.webp'
+    };
+    
+    return tableImages[locationZone] || 'images/tables/Salon Merkez.webp';
 }
 
 // =====================================================
@@ -1198,11 +1388,16 @@ function renderFeedbackGrid(feedbacks) {
         return;
     }
     
-    container.innerHTML = feedbacks.map(fb => `
+    container.innerHTML = feedbacks.map(fb => {
+        const photoUrl = getCustomerPhoto(fb.full_name);
+        return `
         <div class="feedback-card">
             <div class="feedback-card-header">
                 <div class="feedback-user">
-                    <div class="feedback-avatar">${getInitials(fb.full_name)}</div>
+                    ${photoUrl 
+                        ? `<img src="${photoUrl}" alt="${fb.full_name}" class="customer-photo feedback-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="feedback-avatar" style="display:none">${getInitials(fb.full_name)}</div>`
+                        : `<div class="feedback-avatar">${getInitials(fb.full_name)}</div>`
+                    }
                     <div class="feedback-user-info">
                         <h4>${fb.full_name}</h4>
                         <span>${formatDate(fb.start_time)}</span>
@@ -1212,7 +1407,7 @@ function renderFeedbackGrid(feedbacks) {
             </div>
             <p class="feedback-comment">${fb.comment || 'Yorum yapılmamış.'}</p>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 async function submitFeedback(event) {
