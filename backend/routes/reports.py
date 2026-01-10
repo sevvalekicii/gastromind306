@@ -1,43 +1,48 @@
 # Advanced Reports/Queries Routes
-# 5 Sophisticated SQL Queries
+# Sophisticated SQL Queries for Analytics
 from flask import Blueprint, jsonify
 from models.database import execute_query
 
 reports_bp = Blueprint('reports', __name__, url_prefix='/api/reports')
 
-# 1. NESTED QUERY: En çok harcayan müşterinin tüm siparişlerini getir
+# 1. NESTED QUERY: Get all orders from the highest spending customer
 @reports_bp.route('/top-customer-orders', methods=['GET'])
 def get_top_customer_orders():
-    """En yüksek tutarlı dining session'ı getir"""
+    """Get orders from the customer with highest lifetime value (TRUE nested query)"""
     query = """
-    SELECT ds.session_id, c.full_name, ds.total_amount, ds.start_time
-    FROM DININGSESSIONS ds
+    SELECT o.order_id, c.full_name, ds.total_amount, ds.start_time
+    FROM ORDERS o
+    JOIN DININGSESSIONS ds ON o.session_id = ds.session_id
     JOIN RESERVATIONS r ON ds.reservation_id = r.reservation_id
     JOIN CUSTOMERS c ON r.customer_id = c.customer_id
-    ORDER BY ds.total_amount DESC LIMIT 1
+    WHERE r.customer_id = (
+        SELECT customer_id FROM CUSTOMERS 
+        ORDER BY total_ltv DESC LIMIT 1
+    )
+    ORDER BY ds.start_time DESC
     """
     data = execute_query(query)
-    return jsonify(data if data else [])
+    return jsonify(data if data is not None else [])
 
-# 2. GROUP BY - HAVING: Kategorilerin toplam satış ve sipariş sayısı (500 TL üzeri)
+# 2. GROUP BY - HAVING: Category revenue and order count (over 500 threshold)
 @reports_bp.route('/category-revenue', methods=['GET'])
 def get_category_revenue():
-    """Her kategorinin toplam satışını ve sipariş sayısını getir"""
+    """Get total revenue and order count per category"""
     query = """
-    SELECT c.category_name, 
-           SUM(m.price * od.quantity) as total_revenue,
+    SELECT COALESCE(c.category_name, 'Unknown') as category_name, 
+           COALESCE(SUM(m.price * od.quantity), 0) as total_revenue,
            COUNT(DISTINCT o.order_id) as order_count,
-           ROUND(AVG(m.price * od.quantity), 2) as avg_order_value
+           COALESCE(ROUND(AVG(m.price * od.quantity), 2), 0) as avg_order_value
     FROM ORDERDETAILS od
-    JOIN MENUITEMS m ON od.item_id = m.item_id
-    JOIN CATEGORIES c ON m.category_id = c.category_id
-    JOIN ORDERS o ON od.order_id = o.order_id
+    LEFT JOIN MENUITEMS m ON od.item_id = m.item_id
+    LEFT JOIN CATEGORIES c ON m.category_id = c.category_id
+    LEFT JOIN ORDERS o ON od.order_id = o.order_id
     GROUP BY c.category_id, c.category_name
-    HAVING SUM(m.price * od.quantity) > 0
+    HAVING SUM(m.price * od.quantity) > 500
     ORDER BY total_revenue DESC
     """
     data = execute_query(query)
-    return jsonify(data if data else [])
+    return jsonify(data if data is not None else [])
 
 # 3. COMPLEX JOIN + AGGREGATION: Müşteri başına harcanan toplam
 @reports_bp.route('/customer-spending', methods=['GET'])
@@ -78,17 +83,20 @@ def classify_customers():
     data = execute_query(query)
     return jsonify(data if data else [])
 
-# 5. COMPLEX JOIN: Masa performansı (kapasitesi, rezervasyon sayısı, ortalama ciro)
+# 5. COMPLEX JOIN: Table performance (capacity, booking count, average revenue)
 @reports_bp.route('/table-performance', methods=['GET'])
 def get_table_performance():
-    """Her masanın performansını analiz et"""
+    """Analyze each table's performance"""
     query = """
     SELECT t.table_id, t.capacity, t.location_zone,
            COUNT(r.reservation_id) as total_bookings,
            COUNT(ds.session_id) as completed_sessions,
-           ROUND(AVG(ds.total_amount), 2) as avg_revenue,
-           SUM(ds.total_amount) as total_revenue,
-           ROUND(COUNT(ds.session_id) / COUNT(r.reservation_id) * 100, 1) as completion_rate
+           COALESCE(ROUND(AVG(ds.total_amount), 2), 0) as avg_revenue,
+           COALESCE(SUM(ds.total_amount), 0) as total_revenue,
+           CASE 
+               WHEN COUNT(r.reservation_id) = 0 THEN 0
+               ELSE ROUND(COUNT(ds.session_id) * 100.0 / COUNT(r.reservation_id), 1)
+           END as completion_rate
     FROM TABLES t
     LEFT JOIN RESERVATIONS r ON t.table_id = r.table_id
     LEFT JOIN DININGSESSIONS ds ON r.reservation_id = ds.reservation_id
@@ -96,7 +104,7 @@ def get_table_performance():
     ORDER BY total_revenue DESC
     """
     data = execute_query(query)
-    return jsonify(data if data else [])
+    return jsonify(data if data is not None else [])
 
 # 6: Her müşterinin ilk ve son ziyareti + aradaki gün farkı
 @reports_bp.route('/customer-first-last-visit', methods=['GET'])

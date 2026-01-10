@@ -6,17 +6,19 @@ customers_bp = Blueprint('customers', __name__, url_prefix='/api/customers')
 
 @customers_bp.route('', methods=['GET'])
 def get_customers():
-    """VIP'leri en üste koyarak müşterileri getir"""
+    """Get customers, VIPs first"""
     query = """
-    SELECT customer_id, full_name, phone, email, total_ltv, vip_status
+    SELECT customer_id, full_name, 
+           COALESCE(phone, '') as phone, 
+           COALESCE(email, '') as email, 
+           COALESCE(total_ltv, 0) as total_ltv, 
+           COALESCE(vip_status, FALSE) as vip_status
     FROM CUSTOMERS
     ORDER BY vip_status DESC, total_ltv DESC
     """
     data = execute_query(query)
-    if data:
-        return jsonify(data)
-    else:
-        return jsonify({"error": "Müşteriler alınamadı"}), 500
+    # Return empty array if no data (not an error)
+    return jsonify(data if data is not None else [])
 
 # CREATE - Yeni müşteri ekle
 @customers_bp.route('', methods=['POST'])
@@ -100,18 +102,19 @@ def delete_customer(customer_id):
 
 @customers_bp.route('/vip', methods=['GET'])
 def get_vip_customers():
-    """Sadece VIP müşterileri getir"""
+    """Get VIP customers only"""
     query = """
-    SELECT customer_id, full_name, phone, email, total_ltv
+    SELECT customer_id, full_name, 
+           COALESCE(phone, '') as phone, 
+           COALESCE(email, '') as email, 
+           COALESCE(total_ltv, 0) as total_ltv
     FROM CUSTOMERS
     WHERE vip_status = TRUE
     ORDER BY total_ltv DESC
     """
     data = execute_query(query)
-    if data:
-        return jsonify(data)
-    else:
-        return jsonify({"error": "VIP müşterisi bulunamadı"}), 404
+    # Return empty array if no VIP customers (not an error)
+    return jsonify(data if data is not None else [])
 
 @customers_bp.route('/dietary/<int:customer_id>', methods=['GET'])
 def get_customer_dietary_restrictions(customer_id):

@@ -621,42 +621,55 @@ function closeMenuImageModal() {
     }
 }
 function getMenuItemImage(kategori, yemekAdi) {
-    // Yemek bazlı fotoğraflar (dosya adı = yemek adı)
+    // Menu item photos (supports both English and Turkish names)
     const menuPhotos = {
+        // English names (from database)
+        'Beef Carpaccio': 'Dana Carpaccio.webp',
+        'Truffle Potatoes': 'Trüflü Patates.jpg',
+        'Wagyu Burger': 'Wagyu Burger.jpg',
+        'Lamb Rack (For 2)': 'Kuzu Kafes (2 Kişilik).webp',
+        'Grilled Sea Bass': 'Izgara Levrek.jpg',
+        'Jumbo Shrimp': 'Jumbo Karides.jpg',
+        'Truffle Risotto': 'Trüflü Risotto.jpg',
+        'Seafood Linguine': 'Deniz Mahsullü Linguine.jpg',
+        'San Sebastian Cheesecake': 'San Sebastian Cheesecake.jpg',
+        'Chocolate Souffle': 'Çikolatalı Sufle.webp',
+        'Chateau Margaux (Bottle)': 'Château Margaux (Şişe).jpg',
+        'Homemade Lemonade': 'Ev Yapımı Limonata.jpg',
+        // Turkish names (for backwards compatibility)
         'Dana Carpaccio': 'Dana Carpaccio.webp',
         'Trüflü Patates': 'Trüflü Patates.jpg',
-        'Wagyu Burger': 'Wagyu Burger.jpg',
         'Kuzu Kafes (2 Kişilik)': 'Kuzu Kafes (2 Kişilik).webp',
         'Izgara Levrek': 'Izgara Levrek.jpg',
         'Jumbo Karides': 'Jumbo Karides.jpg',
         'Trüflü Risotto': 'Trüflü Risotto.jpg',
         'Deniz Mahsullü Linguine': 'Deniz Mahsullü Linguine.jpg',
-        'San Sebastian Cheesecake': 'San Sebastian Cheesecake.jpg',
         'Çikolatalı Sufle': 'Çikolatalı Sufle.webp',
         'Château Margaux (Şişe)': 'Château Margaux (Şişe).jpg',
         'Ev Yapımı Limonata': 'Ev Yapımı Limonata.jpg'
     };
     
-    // Önce yemek bazlı fotoğraf var mı kontrol et
-    if (menuPhotos[yemekAdi]) {
+    // First check if we have a photo for this item
+    if (yemekAdi && menuPhotos[yemekAdi]) {
         return `images/menu/${menuPhotos[yemekAdi]}`;
     }
     
-    // Yoksa kategoriye göre varsayılan görsel URL'leri (Unsplash)
+    // Otherwise use category-based default images (Unsplash)
     const categoryImages = {
+        // English categories
+        'Appetizers': 'https://images.unsplash.com/photo-1541014741259-de529411b96a?w=400&h=300&fit=crop',
+        'Main Course (Meat)': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop',
+        'Main Course (Seafood)': 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=400&h=300&fit=crop',
+        'Pasta & Risotto': 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400&h=300&fit=crop',
+        'Desserts': 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=300&fit=crop',
+        'Beverages (Premium)': 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
+        // Turkish categories (backwards compatibility)
         'Başlangıçlar': 'https://images.unsplash.com/photo-1541014741259-de529411b96a?w=400&h=300&fit=crop',
-        'Ana Yemekler': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop',
-        'Salatalar': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop',
+        'Ana Yemek (Et)': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop',
+        'Ana Yemek (Deniz)': 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=400&h=300&fit=crop',
+        'Makarna & Risotto': 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400&h=300&fit=crop',
         'Tatlılar': 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=300&fit=crop',
-        'İçecekler': 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
-        'Corbalar': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=300&fit=crop',
-        'Çorbalar': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=300&fit=crop',
-        'Pizzalar': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop',
-        'Burgerler': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop',
-        'Makarnalar': 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400&h=300&fit=crop',
-        'Deniz Ürünleri': 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=400&h=300&fit=crop',
-        'Izgara': 'https://images.unsplash.com/photo-1558030006-450675393462?w=400&h=300&fit=crop',
-        'Kahvaltı': 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400&h=300&fit=crop'
+        'İçecekler (Premium)': 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop'
     };
     
     return categoryImages[kategori] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop';
@@ -761,18 +774,34 @@ function renderCustomersTable(customers) {
     `}).join('');
 }
 
-// Müşteri fotoğrafı al - isim bazlı
+// Get customer photo - name based (supports both Turkish and English names)
 function getCustomerPhoto(fullName) {
-    // Fotoğrafı olan müşteriler (dosya adı = tam isim.webp)
+    // Customer photos (filename = full name.webp)
+    // Maps both English DB names and Turkish file names
     const customerPhotos = {
+        // English names (from database)
+        'Hakan Calhanoglu': 'Hakan Çalhanoğlu.webp',
+        'Arda Guler': 'Arda Güler.webp',
+        'Cenk Tosun': 'Cenk Tosun.webp',
+        'Mert Gunok': 'Mert Günok.webp',
+        'Kerem Akturkoglu': 'Kerem Aktürkoğlu.webp',
+        'Ferdi Kadioglu': 'Ferdi Kadıoğlu.webp',
+        'Baris Alper Yilmaz': 'Barış Alper Yılmaz.webp',
+        'Merih Demiral': 'Merih Demiral.webp',
+        'Abdulkerim Bardakci': 'Abdülkerim Bardakcı.webp',
+        'Kenan Yildiz': 'Kenan Yıldız.webp',
+        'Semih Kilicsoy': 'Semih Kılıçsoy.webp',
+        'Ismail Yuksek': 'İsmail Yüksek.webp',
+        'Salih Ozcan': 'Salih Özcan.webp',
+        'Altay Bayindir': 'Altay Bayındır.webp',
+        'Irfan Can Kahveci': 'İrfan Can Kahveci.webp',
+        // Turkish names (for backwards compatibility)
         'Hakan Çalhanoğlu': 'Hakan Çalhanoğlu.webp',
         'Arda Güler': 'Arda Güler.webp',
-        'Cenk Tosun': 'Cenk Tosun.webp',
         'Mert Günok': 'Mert Günok.webp',
         'Kerem Aktürkoğlu': 'Kerem Aktürkoğlu.webp',
         'Ferdi Kadıoğlu': 'Ferdi Kadıoğlu.webp',
         'Barış Alper Yılmaz': 'Barış Alper Yılmaz.webp',
-        'Merih Demiral': 'Merih Demiral.webp',
         'Abdülkerim Bardakcı': 'Abdülkerim Bardakcı.webp',
         'Kenan Yıldız': 'Kenan Yıldız.webp',
         'Semih Kılıçsoy': 'Semih Kılıçsoy.webp',
@@ -782,7 +811,7 @@ function getCustomerPhoto(fullName) {
         'İrfan Can Kahveci': 'İrfan Can Kahveci.webp'
     };
     
-    if (customerPhotos[fullName]) {
+    if (fullName && customerPhotos[fullName]) {
         return `images/customers/${customerPhotos[fullName]}`;
     }
     return null;
@@ -1143,14 +1172,21 @@ function closeTableImageModal() {
     }
 }
 
-// Masa bölgesine göre arka plan fotoğrafı
+// Get table background image by location zone (supports English and Turkish)
 function getTableBackgroundImage(locationZone) {
     const tableImages = {
+        // English zone names
+        'Window Side A': 'images/tables/Cam Kenarı A.webp',
+        'Main Hall': 'images/tables/Salon Merkez.webp',
+        'VIP Lounge': 'images/tables/VIP Loca.webp',
+        'Terrace': 'images/tables/Teras.webp',
+        'Bar': 'images/tables/Bar.webp',
+        'Garden': 'images/tables/Bahçe.webp',
+        // Turkish zone names (backwards compatibility)
         'Cam Kenarı A': 'images/tables/Cam Kenarı A.webp',
         'Salon Merkez': 'images/tables/Salon Merkez.webp',
         'VIP Loca': 'images/tables/VIP Loca.webp',
         'Teras': 'images/tables/Teras.webp',
-        'Bar': 'images/tables/Bar.webp',
         'Bahçe': 'images/tables/Bahçe.webp'
     };
     

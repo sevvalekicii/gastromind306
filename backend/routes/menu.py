@@ -6,32 +6,47 @@ menu_bp = Blueprint('menu', __name__, url_prefix='/api/menu')
 
 @menu_bp.route('', methods=['GET'])
 def get_menu():
-    """Menüyü kategori isimleriyle birlikte getir"""
+    """Get menu with category names"""
     query = """
-    SELECT m.item_id, m.name as Yemek, m.price as Fiyat, 
-           c.category_name as Kategori, m.prep_time_minutes as Hazirlanma
+    SELECT m.item_id, 
+           COALESCE(m.name, 'Unknown Item') as Yemek, 
+           COALESCE(m.price, 0) as Fiyat, 
+           COALESCE(c.category_name, 'Uncategorized') as Kategori, 
+           COALESCE(m.prep_time_minutes, 0) as Hazirlanma
     FROM MENUITEMS m
-    JOIN CATEGORIES c ON m.category_id = c.category_id
+    LEFT JOIN CATEGORIES c ON m.category_id = c.category_id
     ORDER BY m.price DESC
     """
     data = execute_query(query)
-    if data:
-        return jsonify(data)
-    else:
-        return jsonify({"error": "Menü alınamadı"}), 500
+    # Return empty array if no menu items (not an error)
+    return jsonify(data if data is not None else [])
 
 @menu_bp.route('/category/<int:category_id>', methods=['GET'])
 def get_menu_by_category(category_id):
-    """Belirli bir kategorideki menü ürünlerini getir"""
+    """Get menu items for a specific category"""
     query = """
-    SELECT m.item_id, m.name, m.price, c.category_name
+    SELECT m.item_id, 
+           COALESCE(m.name, 'Unknown Item') as name, 
+           COALESCE(m.price, 0) as price, 
+           COALESCE(c.category_name, 'Uncategorized') as category_name
     FROM MENUITEMS m
-    JOIN CATEGORIES c ON m.category_id = c.category_id
+    LEFT JOIN CATEGORIES c ON m.category_id = c.category_id
     WHERE m.category_id = %s
     ORDER BY m.price ASC
     """
     data = execute_query(query, (category_id,))
-    if data:
-        return jsonify(data)
-    else:
-        return jsonify({"error": "Kategori bulunamadı"}), 404
+    # Return empty array if no items in category (not necessarily an error)
+    return jsonify(data if data is not None else [])
+
+@menu_bp.route('/categories', methods=['GET'])
+def get_categories():
+    """Get all menu categories"""
+    query = """
+    SELECT category_id, 
+           COALESCE(category_name, 'Uncategorized') as category_name,
+           COALESCE(target_margin, 0) as target_margin
+    FROM CATEGORIES
+    ORDER BY category_id
+    """
+    data = execute_query(query)
+    return jsonify(data if data is not None else [])
