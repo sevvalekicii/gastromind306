@@ -4,7 +4,7 @@
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': '71841527184152eK*',
+    'password': 'Samet123.',
     'database': 'GastroMind_DB'
 }
 

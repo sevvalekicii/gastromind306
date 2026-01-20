@@ -12,37 +12,39 @@ def get_top_customer_orders():
     query = """
     SELECT o.order_id, c.full_name, ds.total_amount, ds.start_time
     FROM ORDERS o
-    JOIN DININGSESSIONS ds ON o.session_id = ds.session_id
-    JOIN RESERVATIONS r ON ds.reservation_id = r.reservation_id
-    JOIN CUSTOMERS c ON r.customer_id = c.customer_id
+    INNER JOIN DININGSESSIONS ds ON o.session_id = ds.session_id
+    INNER JOIN RESERVATIONS r ON ds.reservation_id = r.reservation_id
+    INNER JOIN CUSTOMERS c ON r.customer_id = c.customer_id
     WHERE r.customer_id = (
         SELECT customer_id FROM CUSTOMERS 
+        WHERE total_ltv IS NOT NULL AND total_ltv > 0
         ORDER BY total_ltv DESC LIMIT 1
     )
     ORDER BY ds.start_time DESC
     """
     data = execute_query(query)
+    
+    # If no orders found for top LTV customer, get top customer by order count instead
+    if not data:
+        query_fallback = """
+        SELECT o.order_id, c.full_name, ds.total_amount, ds.start_time
+        FROM ORDERS o
+        INNER JOIN DININGSESSIONS ds ON o.session_id = ds.session_id
+        INNER JOIN RESERVATIONS r ON ds.reservation_id = r.reservation_id
+        INNER JOIN CUSTOMERS c ON r.customer_id = c.customer_id
+        WHERE r.customer_id IN (
+            SELECT r2.customer_id 
+            FROM RESERVATIONS r2 
+            GROUP BY r2.customer_id 
+            ORDER BY COUNT(r2.reservation_id) DESC 
+            LIMIT 1
+        )
+        ORDER BY ds.start_time DESC
+        """
+        data = execute_query(query_fallback)
+    
     return jsonify(data if data is not None else [])
 
-# 2. GROUP BY - HAVING: Category revenue and order count (over 500 threshold)
-@reports_bp.route('/category-revenue', methods=['GET'])
-def get_category_revenue():
-    """Get total revenue and order count per category"""
-    query = """
-    SELECT COALESCE(c.category_name, 'Unknown') as category_name, 
-           COALESCE(SUM(m.price * od.quantity), 0) as total_revenue,
-           COUNT(DISTINCT o.order_id) as order_count,
-           COALESCE(ROUND(AVG(m.price * od.quantity), 2), 0) as avg_order_value
-    FROM ORDERDETAILS od
-    LEFT JOIN MENUITEMS m ON od.item_id = m.item_id
-    LEFT JOIN CATEGORIES c ON m.category_id = c.category_id
-    LEFT JOIN ORDERS o ON od.order_id = o.order_id
-    GROUP BY c.category_id, c.category_name
-    HAVING SUM(m.price * od.quantity) > 500
-    ORDER BY total_revenue DESC
-    """
-    data = execute_query(query)
-    return jsonify(data if data is not None else [])
 
 # 3. COMPLEX JOIN + AGGREGATION: Müşteri başına harcanan toplam
 @reports_bp.route('/customer-spending', methods=['GET'])
@@ -153,16 +155,14 @@ def get_staff_performance():
     """Her personelin toplam sipariş sayısı ve cirosu"""
     query = """
     SELECT s.staff_id, s.name, s.role,
-           COUNT(DISTINCT o.order_id) AS total_orders,
-           SUM(ds.total_amount) AS total_revenue,
-           ROUND(AVG(ds.total_amount), 2) AS avg_order_value
+           COALESCE(COUNT(DISTINCT o.order_id), 0) AS total_orders,
+           COALESCE(SUM(ds.total_amount), 0) AS total_revenue,
+           COALESCE(ROUND(AVG(ds.total_amount), 2), 0) AS avg_order_value
     FROM STAFF s
     LEFT JOIN ORDERS o ON s.staff_id = o.staff_id
     LEFT JOIN DININGSESSIONS ds ON o.session_id = ds.session_id
-    WHERE s.role IN ('Garson', 'Host')
     GROUP BY s.staff_id, s.name, s.role
-    HAVING COUNT(DISTINCT o.order_id) > 0
-    ORDER BY total_revenue DESC
+    ORDER BY total_revenue DESC, s.name ASC
     """
     data = execute_query(query)
     return jsonify(data if data else [])
@@ -200,45 +200,33 @@ def get_reservation_status_analysis():
     data = execute_query(query)
     return jsonify(data if data else [])
 
-# 11. COMPLEX JOIN + GROUP BY: Diyet kısıtlamalı müşterilerin tercihleri
-@reports_bp.route('/dietary-preferences', methods=['GET'])
-def get_dietary_preferences():
-    """Diyet kısıtlamalı müşterilerin en çok tercih ettikleri kategoriler"""
+# 10. NESTED QUERY: Peak day sessions - All sessions from the highest revenue day
+@reports_bp.route('/peak-day-sessions', methods=['GET'])
+def get_peak_day_sessions():
+    """Get all sessions from the day with highest total revenue (nested query)"""
     query = """
-    SELECT dr.restriction_type,
-           c.category_name,
-           COUNT(DISTINCT od.detail_id) AS total_orders,
-           SUM(od.quantity) AS total_quantity
-    FROM DIETARYRESTRICTIONS dr
-    JOIN CUSTOMERS cust ON dr.customer_id = cust.customer_id
-    JOIN RESERVATIONS r ON cust.customer_id = r.customer_id
-    JOIN DININGSESSIONS ds ON r.reservation_id = ds.reservation_id
-    JOIN ORDERS o ON ds.session_id = o.session_id
-    JOIN ORDERDETAILS od ON o.order_id = od.order_id
-    JOIN MENUITEMS m ON od.item_id = m.item_id
-    JOIN CATEGORIES c ON m.category_id = c.category_id
-    GROUP BY dr.restriction_type, c.category_name
-    HAVING COUNT(DISTINCT od.detail_id) > 0
-    ORDER BY dr.restriction_type, total_orders DESC
+    SELECT DATE(ds.start_time) as session_date,
+           r.party_size,
+           c.full_name as customer_name,
+           t.table_id,
+           ds.session_id,
+           ds.total_amount,
+           ds.start_time,
+           ds.end_time,
+           (SELECT COUNT(*) FROM ORDERS WHERE session_id = ds.session_id) as order_count
+    FROM DININGSESSIONS ds
+    LEFT JOIN RESERVATIONS r ON ds.reservation_id = r.reservation_id
+    LEFT JOIN CUSTOMERS c ON r.customer_id = c.customer_id
+    LEFT JOIN TABLES t ON r.table_id = t.table_id
+    WHERE DATE(ds.start_time) = (
+        SELECT DATE(start_time)
+        FROM DININGSESSIONS
+        GROUP BY DATE(start_time)
+        ORDER BY SUM(total_amount) DESC LIMIT 1
+    )
+    ORDER BY ds.start_time DESC
     """
     data = execute_query(query)
-    return jsonify(data if data else [])
+    return jsonify(data if data is not None else [])
 
-# 12. DATE FUNCTIONS: Müşteri yaşam döngüsü analizi
-@reports_bp.route('/customer-lifecycle', methods=['GET'])
-def get_customer_lifecycle():
-    """Müşterilerin ilk/son ziyaret ve yaşam süresi"""
-    query = """
-    SELECT cust.customer_id, cust.full_name,
-           MIN(ds.start_time) AS first_visit,
-           MAX(ds.start_time) AS last_visit,
-           DATEDIFF(MAX(ds.start_time), MIN(ds.start_time)) AS customer_lifetime_days,
-           COUNT(ds.session_id) AS total_visits
-    FROM CUSTOMERS cust
-    JOIN RESERVATIONS r ON cust.customer_id = r.customer_id
-    JOIN DININGSESSIONS ds ON r.reservation_id = ds.reservation_id
-    GROUP BY cust.customer_id, cust.full_name
-    ORDER BY customer_lifetime_days DESC
-    """
-    data = execute_query(query)
-    return jsonify(data if data else [])
+

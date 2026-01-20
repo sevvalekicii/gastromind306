@@ -339,7 +339,7 @@ function loadPageData(pageId) {
         case 'reservations': loadReservations(); break;
         case 'orders': loadOrders(); break;
         case 'tables': loadTables(); break;
-        case 'reports': loadReport('category-revenue'); break;
+        case 'reports': loadReport('customer-spending'); break;
         case 'feedback': loadFeedback(); break;
         case 'staff': loadStaff(); break;
     }
@@ -1206,18 +1206,19 @@ document.querySelectorAll('.report-tab').forEach(tab => {
 
 async function loadReport(reportType) {
     const reportConfigs = {
-        'category-revenue': {
-            title: 'Kategori Bazlı Satış Raporu',
-            headers: ['Kategori', 'Toplam Satış', 'Sipariş Sayısı', 'Ort. Sipariş'],
+        'top-customer-orders': {
+            title: 'En Yüksek Harcayan Müşterinin Siparişleri',
+            headers: ['Sipariş ID', 'Müşteri', 'Tutar', 'Tarih'],
             render: (item) => `
                 <tr>
-                    <td><strong>${item.category_name}</strong></td>
-                    <td>${formatCurrency(item.total_revenue)}</td>
-                    <td>${item.order_count}</td>
-                    <td>${formatCurrency(item.avg_order_value)}</td>
+                    <td><strong>#${item.order_id}</strong></td>
+                    <td>${item.full_name}</td>
+                    <td>${formatCurrency(item.total_amount)}</td>
+                    <td>${formatDate(item.start_time)}</td>
                 </tr>
             `
         },
+
         'customer-spending': {
             title: 'Müşteri Harcama Analizi',
             headers: ['Müşteri', 'VIP', 'Ziyaret', 'Toplam Harcama', 'Ort. Harcama', 'Son Ziyaret'],
@@ -1296,6 +1297,21 @@ async function loadReport(reportType) {
                 </tr>
             `
         },
+        'peak-day-sessions': {
+            title: 'En Yüksek Ciro Yapılan Gün Oturumları',
+            headers: ['Tarih', 'Müşteri', 'Masa', 'Kişi', 'Tutar', 'Başlama Saati', 'Sipariş Sayısı'],
+            render: (item) => `
+                <tr>
+                    <td><strong>${formatDate(item.session_date)}</strong></td>
+                    <td>${item.customer_name || 'Misafir'}</td>
+                    <td>Masa ${item.table_id || 'N/A'}</td>
+                    <td>${item.party_size || '-'}</td>
+                    <td><strong>${formatCurrency(item.total_amount)}</strong></td>
+                    <td>${item.start_time ? new Date(item.start_time).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'}) : 'N/A'}</td>
+                    <td>${item.order_count}</td>
+                </tr>
+            `
+        },
         'customer-first-last-visit': {
             title: 'Müşteri Yaşam Döngüsü',
             headers: ['Müşteri', 'İlk Ziyaret', 'Son Ziyaret', 'Müşteri Yaşı (Gün)'],
@@ -1320,18 +1336,7 @@ async function loadReport(reportType) {
                 </tr>
             `
         },
-        'dietary-preferences': {
-            title: 'Diyet Tercihi Analizi',
-            headers: ['Kısıtlama Türü', 'Kategori', 'Sipariş Sayısı', 'Toplam Adet'],
-            render: (item) => `
-                <tr>
-                    <td><strong>${item.restriction_type}</strong></td>
-                    <td>${item.category_name}</td>
-                    <td>${item.total_orders}</td>
-                    <td>${item.total_quantity}</td>
-                </tr>
-            `
-        }
+
     };
     
     const config = reportConfigs[reportType];
@@ -1352,9 +1357,20 @@ async function loadReport(reportType) {
             document.getElementById('reportTableBody').innerHTML = 
                 `<tr><td colspan="${config.headers.length}" class="loading-cell">Veri bulunamadı</td></tr>`;
         }
+        
+        // Show action buttons based on report type
+        const actionsDiv = document.getElementById('reportActions');
+        if (reportType === 'customer-classification') {
+            actionsDiv.innerHTML = `<button class="btn btn-primary" onclick="loadReport('top-customer-orders')" style="background-color: #d4af37;">👑 Platinum Müşteri Siparişleri</button>`;
+            actionsDiv.style.display = 'block';
+        } else {
+            actionsDiv.style.display = 'none';
+        }
+        
     } catch (error) {
         document.getElementById('reportTableBody').innerHTML = 
             `<tr><td colspan="${config.headers.length}" class="loading-cell">Rapor yüklenemedi</td></tr>`;
+        document.getElementById('reportActions').style.display = 'none';
     }
 }
 
