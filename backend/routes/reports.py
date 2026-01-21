@@ -46,10 +46,10 @@ def get_top_customer_orders():
     return jsonify(data if data is not None else [])
 
 
-# 3. COMPLEX JOIN + AGGREGATION: Müşteri başına harcanan toplam
+# 2. COMPLEX JOIN + AGGREGATION: Total spending, visits, average per customer
 @reports_bp.route('/customer-spending', methods=['GET'])
 def get_customer_spending():
-    """Müşteri başına toplam harcama, ziyaret sayısı ve ortalama"""
+    """Total spending, visit count, and average per customer"""
     query = """
     SELECT cust.customer_id, cust.full_name, cust.vip_status,
            COUNT(ds.session_id) as visit_count,
@@ -66,7 +66,7 @@ def get_customer_spending():
     data = execute_query(query)
     return jsonify(data if data else [])
 
-# 4. CASE STATEMENT: Müşteri sınıflandırması (Platinum, Gold, Regular, Inactive)
+# 3. CASE STATEMENT: Customer classification (Platinum, Gold, Regular, Inactive)
 @reports_bp.route('/customer-classification', methods=['GET'])
 def classify_customers():
     """Müşterileri harcamalarına göre sınıflandır"""
@@ -85,7 +85,7 @@ def classify_customers():
     data = execute_query(query)
     return jsonify(data if data else [])
 
-# 5. COMPLEX JOIN: Table performance (capacity, booking count, average revenue)
+# 4. COMPLEX JOIN: Table performance (capacity, booking count, average revenue)
 @reports_bp.route('/table-performance', methods=['GET'])
 def get_table_performance():
     """Analyze each table's performance"""
@@ -108,10 +108,10 @@ def get_table_performance():
     data = execute_query(query)
     return jsonify(data if data is not None else [])
 
-# 6: Her müşterinin ilk ve son ziyareti + aradaki gün farkı
+# 5. GROUP BY + DATE FUNCTIONS: Customer lifetime duration
 @reports_bp.route('/customer-first-last-visit', methods=['GET'])
 def get_customer_first_last_visit():
-    """Her müşterinin ilk ve son ziyareti + aradaki gün farkı"""
+    """Get first visit, last visit, and customer lifetime days for each customer"""
     query = """
     SELECT cust.customer_id,
         cust.full_name,
@@ -127,7 +127,7 @@ def get_customer_first_last_visit():
     data = execute_query(query)
     return jsonify(data if data else [])
 
-# 7. GROUP BY - HAVING: En çok sipariş edilen menü öğeleri (Top 10)
+# 6. GROUP BY - HAVING: Top menu items (Top 10)
 @reports_bp.route('/top-menu-items', methods=['GET'])
 def get_top_menu_items():
     """En çok sipariş edilen menü öğelerini getir (top 10)"""
@@ -149,7 +149,7 @@ def get_top_menu_items():
     data = execute_query(query)
     return jsonify(data if data else [])
 
-# 8. NESTED QUERY + GROUP BY: Personel satış performansı
+# 7. LEFT JOIN + GROUP BY + COALESCE: Staff sales performance
 @reports_bp.route('/staff-performance', methods=['GET'])
 def get_staff_performance():
     """Her personelin toplam sipariş sayısı ve cirosu"""
@@ -167,7 +167,7 @@ def get_staff_performance():
     data = execute_query(query)
     return jsonify(data if data else [])
 
-# 9. GROUP BY - HAVING: Günlük ciro raporu
+# 8. GROUP BY - HAVING: Daily revenue report
 @reports_bp.route('/daily-revenue', methods=['GET'])
 def get_daily_revenue():
     """Tarihe göre günlük toplam ciro"""
@@ -184,7 +184,7 @@ def get_daily_revenue():
     data = execute_query(query)
     return jsonify(data if data else [])
 
-# 10. NESTED QUERY: Rezervasyon durumu analizi
+# 9. NESTED QUERY: Reservation status analysis
 @reports_bp.route('/reservation-status-analysis', methods=['GET'])
 def get_reservation_status_analysis():
     """Rezervasyon durumlarına göre analiz"""
