@@ -1050,14 +1050,14 @@ async function showOrderDetails(orderId) {
             const total = data.reduce((sum, item) => sum + parseFloat(item.total_price || 0), 0);
             
             content.innerHTML = `
-                <table class="order-details-table">
+                <table class="order-details-table" style="color: white;">
                     <thead>
                         <tr>
-                            <th>Ürün</th>
-                            <th>Adet</th>
-                            <th>Birim Fiyat</th>
-                            <th>Toplam</th>
-                            <th>Not</th>
+                            <th style="color: rgba(255, 255, 255, 0.7);">Ürün</th>
+                            <th style="color: rgba(255, 255, 255, 0.7);">Adet</th>
+                            <th style="color: rgba(255, 255, 255, 0.7);">Birim Fiyat</th>
+                            <th style="color: rgba(255, 255, 255, 0.7);">Toplam</th>
+                            <th style="color: rgba(255, 255, 255, 0.7);">Not</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1072,7 +1072,7 @@ async function showOrderDetails(orderId) {
                         `).join('')}
                     </tbody>
                 </table>
-                <div class="order-total">
+                <div class="order-total" style="color: white;">
                     Toplam: <span>${formatCurrency(total)}</span>
                 </div>
             `;
@@ -1207,7 +1207,7 @@ document.querySelectorAll('.report-tab').forEach(tab => {
 async function loadReport(reportType) {
     const reportConfigs = {
         'top-customer-orders': {
-            title: 'En Yüksek Harcayan Müşterinin Siparişleri',
+            title: 'En Yüksek LTV\'li Müşterinin Siparişleri',
             headers: ['Sipariş ID', 'Müşteri', 'Tutar', 'Tarih'],
             render: (item) => `
                 <tr>
@@ -1314,7 +1314,7 @@ async function loadReport(reportType) {
         },
         'customer-first-last-visit': {
             title: 'Müşteri Yaşam Döngüsü',
-            headers: ['Müşteri', 'İlk Ziyaret', 'Son Ziyaret', 'Müşteri Yaşı (Gün)'],
+            headers: ['Müşteri', 'İlk Ziyaret', 'Son Ziyaret', 'Aradaki Gün Sayısı'],
             render: (item) => `
                 <tr>
                     <td><strong>${item.full_name}</strong></td>
@@ -1361,7 +1361,7 @@ async function loadReport(reportType) {
         // Show action buttons based on report type
         const actionsDiv = document.getElementById('reportActions');
         if (reportType === 'customer-classification') {
-            actionsDiv.innerHTML = `<button class="btn btn-primary" onclick="loadReport('top-customer-orders')" style="background-color: #d4af37;">👑 Platinum Müşteri Siparişleri</button>`;
+            actionsDiv.innerHTML = `<button class="btn btn-primary" onclick="loadReport('top-customer-orders')" style="background-color: #d4af37;">👑 En Yüksek LTV'li Müşteri Siparişleri</button>`;
             actionsDiv.style.display = 'block';
         } else {
             actionsDiv.style.display = 'none';
